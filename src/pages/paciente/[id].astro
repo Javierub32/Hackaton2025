@@ -1,0 +1,198 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro'
+import { getCollection } from 'astro:content'
+import { CATEGORIAS_INGRESO } from '../../content/config'
+
+const { id } = Astro.params
+
+// Cargar todos los pacientes
+const todosPacientes = await getCollection('datosPrincipales')
+
+// Convertir el id a número
+const pacienteId = Number(id)
+
+// Buscar el paciente específico
+const paciente = todosPacientes.find(p => p.data.paciente_id === pacienteId)
+
+// Si no se encuentra el paciente, devolver 404
+if (!paciente) {
+  return Astro.redirect('/404')
+}
+
+// Función para obtener el nombre del sexo
+function getSexoNombre(sexo: number): string {
+  return sexo === 1 ? 'Masculino' : 'Femenino'
+}
+
+// Función para obtener el nombre de la CCAA
+function getCCAANombre(ccaa: number): string {
+  const ccaaMap: Record<number, string> = {
+    1: 'Andalucía',
+    2: 'La Rioja',
+    // Agregar más según sea necesario
+  }
+  return ccaaMap[ccaa] || `CCAA ${ccaa}`
+}
+---
+
+<DashboardLayout activePage="pacientes" title={`Paciente #${paciente.data.paciente_id}`}>
+  <div class="p-6 max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+      <a 
+        href="/pacientes" 
+        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+      >
+        <span class="material-symbols-outlined text-lg">arrow_back</span>
+        Volver a Pacientes
+      </a>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2">Paciente #{paciente.data.paciente_id}</h1>
+      <p class="text-gray-600 dark:text-gray-400">Información detallada del paciente</p>
+    </div>
+
+    <!-- Información del Paciente -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Datos Personales -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300">
+      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">person</span>
+        Datos Personales
+      </h2>
+      <div class="space-y-5">
+        <div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">ID Paciente:</span>
+          <span class="font-semibold">#{paciente.data.paciente_id}</span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Edad:</span>
+          <span class="font-semibold">{paciente.data.edad} años</span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Sexo:</span>
+          <span class={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
+            paciente.data.sexo === 1
+              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+              : 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400'
+          }`}>
+            {getSexoNombre(paciente.data.sexo)}
+          </span>
+        </div>
+        <div class="flex justify-between items-center py-3">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Comunidad Autónoma:</span>
+          <span class="font-semibold">{getCCAANombre(paciente.data.ccaa)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos Clínicos -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300">
+      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <span class="material-symbols-outlined text-green-600 dark:text-green-400">medical_information</span>
+        Datos Clínicos
+      </h2>
+      <div class="space-y-5">
+        <div class="py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium block mb-2">Diagnóstico Principal:</span>
+          <span class="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded inline-block">
+            {paciente.data.diagnostico_principal}
+          </span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Servicio:</span>
+          <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 rounded-full text-sm font-medium">
+            {paciente.data.servicio}
+          </span>
+        </div>
+        <div class="flex justify-between items-center py-3">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Categoría de Ingreso:</span>
+          <span class="text-sm font-semibold text-right max-w-xs">
+            {paciente.data.categoria_ingreso_descripcion || CATEGORIAS_INGRESO[paciente.data.categoria_ingreso] || `Categoría ${paciente.data.categoria_ingreso}`}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de Ingreso -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300">
+      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">calendar_month</span>
+        Información de Ingreso
+      </h2>
+      <div class="space-y-5">
+        <div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Fecha de Ingreso:</span>
+          <span class="font-semibold">{paciente.data.fecha_ingreso}</span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Estancia (días):</span>
+          <span class="font-semibold text-lg">{paciente.data.estancia_dias}</span>
+        </div>
+        <div class="flex justify-between items-center py-3">
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Fecha de Alta:</span>
+          <span class="font-semibold">{paciente.data.fecha_alta}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas Adicionales -->
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-750 rounded-xl shadow-lg p-8 border border-blue-200 dark:border-gray-700 hover:shadow-xl transition-shadow duration-300">
+      <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 pb-4 border-b border-blue-200 dark:border-gray-700">
+        <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">analytics</span>
+        Resumen
+      </h2>
+      <div class="space-y-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Estado del Paciente</div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
+            <span class="font-semibold">Registro Completo</span>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Duración de Estancia</div>
+          <div class="flex items-center gap-2">
+            {paciente.data.estancia_dias < 7 ? (
+              <>
+                <span class="material-symbols-outlined text-green-600 dark:text-green-400">schedule</span>
+                <span class="font-semibold">Estancia Corta</span>
+              </>
+            ) : paciente.data.estancia_dias < 30 ? (
+              <>
+                <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400">schedule</span>
+                <span class="font-semibold">Estancia Media</span>
+              </>
+            ) : (
+              <>
+                <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">schedule</span>
+                <span class="font-semibold">Estancia Prolongada</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Botón de acción -->
+    <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+      <a 
+        href="/pacientes"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+      >
+        <span class="material-symbols-outlined">arrow_back</span>
+        Volver al listado
+      </a>
+      
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        <span class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">info</span>
+          ID: #{paciente.data.paciente_id}
+        </span>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

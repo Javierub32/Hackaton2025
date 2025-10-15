@@ -1,0 +1,337 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+import { getCollection } from 'astro:content';
+import { CATEGORIAS_INGRESO } from '../content/config';
+
+// Obtener TODOS los pacientes de la colección
+const todosPacientes = await getCollection('datosPrincipales');
+
+// Obtener parámetros de URL para filtros y paginación
+const url = new URL(Astro.request.url);
+const page = parseInt(url.searchParams.get('page') || '1');
+const searchQuery = url.searchParams.get('search') || '';
+const sexoFilter = url.searchParams.get('sexo') || '';
+const diagnosticoFilter = url.searchParams.get('diagnostico') || '';
+const servicioFilter = url.searchParams.get('servicio') || '';
+const ccaaFilter = url.searchParams.get('ccaa') || '';
+const categoriaFilter = url.searchParams.get('categoria') || '';
+
+const itemsPerPage = 25;
+
+// Obtener valores únicos para los filtros
+const diagnosticosUnicos = [...new Set(todosPacientes.map(p => p.data.diagnostico_principal))].sort();
+const serviciosUnicos = [...new Set(todosPacientes.map(p => p.data.servicio))].sort();
+const ccaaUnicas = [...new Set(todosPacientes.map(p => p.data.ccaa))].sort();
+const categoriasUnicas = [...new Set(todosPacientes.map(p => p.data.categoria_ingreso))].sort();
+
+// Filtrar pacientes
+let pacientesFiltrados = todosPacientes.filter(paciente => {
+  const matchSearch = searchQuery === '' || 
+    paciente.data.paciente_id.toString().includes(searchQuery) ||
+    paciente.data.diagnostico_principal.toLowerCase().includes(searchQuery.toLowerCase());
+  
+  const matchSexo = sexoFilter === '' || paciente.data.sexo.toString() === sexoFilter;
+  const matchDiagnostico = diagnosticoFilter === '' || paciente.data.diagnostico_principal === diagnosticoFilter;
+  const matchServicio = servicioFilter === '' || paciente.data.servicio === servicioFilter;
+  const matchCCAA = ccaaFilter === '' || paciente.data.ccaa.toString() === ccaaFilter;
+  const matchCategoria = categoriaFilter === '' || paciente.data.categoria_ingreso.toString() === categoriaFilter;
+  
+  return matchSearch && matchSexo && matchDiagnostico && matchServicio && matchCCAA && matchCategoria;
+});
+
+// Calcular paginación
+const totalPacientes = pacientesFiltrados.length;
+const totalPages = Math.ceil(totalPacientes / itemsPerPage);
+const currentPage = Math.min(Math.max(1, page), totalPages || 1);
+const startIndex = (currentPage - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, totalPacientes);
+
+const pacientesMostrados = pacientesFiltrados.slice(startIndex, endIndex);
+
+// Función para obtener el nombre del sexo
+function getSexoNombre(sexo: number): string {
+  switch(sexo) {
+    case 1: return 'Masculino';
+    case 2: return 'Femenino';
+    default: return 'No especificado';
+  }
+}
+
+// Función para obtener el nombre de la CCAA
+function getCCAANombre(ccaa: number): string {
+  const ccaaMap: Record<number, string> = {
+    1: 'Andalucía',
+    2: 'La Rioja',
+    // Añade más según necesites
+  };
+  return ccaaMap[ccaa] || `CCAA ${ccaa}`;
+}
+---
+
+<DashboardLayout title="Gestión de Pacientes" activePage="pacientes">
+  <div class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+    
+    <div class="mb-6">
+      <h2 class="text-2xl sm:text-3xl font-bold mb-2">Gestión de Pacientes</h2>
+      <p class="text-gray-600 dark:text-gray-400">
+        Listado de {totalPacientes.toLocaleString()} pacientes del sistema
+      </p>
+    </div>
+
+    {/* Formulario de filtros */}
+    <form method="get" class="mb-6">
+      {/* Barra de búsqueda */}
+      <div class="mb-4">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            search
+          </span>
+          <input 
+            type="text" 
+            name="search"
+            value={searchQuery}
+            placeholder="Buscar por ID o diagnóstico..." 
+            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+          />
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
+        {/* Filtro por Sexo */}
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="sexo">
+            Sexo
+          </label>
+          <select 
+            name="sexo" 
+            id="sexo"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+          >
+            <option value="">Todos</option>
+            <option value="1" selected={sexoFilter === '1'}>Masculino</option>
+            <option value="2" selected={sexoFilter === '2'}>Femenino</option>
+          </select>
+        </div>
+
+        {/* Filtro por Diagnóstico */}
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="diagnostico">
+            Diagnóstico
+          </label>
+          <select 
+            name="diagnostico" 
+            id="diagnostico"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+          >
+            <option value="">Todos</option>
+            {diagnosticosUnicos.slice(0, 50).map(diag => (
+              <option value={diag} selected={diagnosticoFilter === diag}>
+                {diag}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro por Servicio */}
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="servicio">
+            Servicio
+          </label>
+          <select 
+            name="servicio" 
+            id="servicio"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+          >
+            <option value="">Todos</option>
+            {serviciosUnicos.map(serv => (
+              <option value={serv} selected={servicioFilter === serv}>
+                {serv}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro por CCAA */}
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="ccaa">
+            Comunidad Autónoma
+          </label>
+          <select 
+            name="ccaa" 
+            id="ccaa"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+          >
+            <option value="">Todas</option>
+            {ccaaUnicas.map(ccaa => (
+              <option value={ccaa} selected={ccaaFilter === ccaa.toString()}>
+                {getCCAANombre(ccaa)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro por Categoría de Ingreso */}
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="categoria">
+            Categoría de Ingreso
+          </label>
+          <select 
+            name="categoria" 
+            id="categoria"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+          >
+            <option value="">Todas</option>
+            {categoriasUnicas.map(cat => (
+              <option value={cat} selected={categoriaFilter === cat.toString()}>
+                {CATEGORIAS_INGRESO[cat] || `Categoría ${cat}`}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Botones de acción */}
+      <div class="flex gap-3">
+        <button 
+          type="submit"
+          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+        >
+          Aplicar Filtros
+        </button>
+        <a 
+          href="/pacientes"
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
+        >
+          Limpiar Filtros
+        </a>
+      </div>
+    </form>
+
+    {/* Tabla de pacientes */}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 dark:bg-gray-700/50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                ID Paciente
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Edad
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Sexo
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Diagnóstico Principal
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Servicio
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Estancia (días)
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Fecha Ingreso
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                CCAA
+              </th>
+              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            {pacientesMostrados.length === 0 ? (
+              <tr>
+                <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                  <span class="material-symbols-outlined text-4xl mb-2 block">search_off</span>
+                  No se encontraron pacientes con los filtros aplicados
+                </td>
+              </tr>
+            ) : (
+              pacientesMostrados.map((paciente, i) => (
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    #{paciente.data.paciente_id}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {paciente.data.edad} años
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      paciente.data.sexo === 1
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                        : 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400'
+                    }`}>
+                      {getSexoNombre(paciente.data.sexo)}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                    {paciente.data.diagnostico_principal}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 rounded text-xs font-medium">
+                      {paciente.data.servicio}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                    {paciente.data.estancia_dias}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {paciente.data.fecha_ingreso}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {getCCAANombre(paciente.data.ccaa)}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                    <a 
+                      href={`/paciente/${paciente.data.paciente_id}`}
+                      class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                      title="Ver detalles completos"
+                    >
+                      <span class="material-symbols-outlined text-xl">visibility</span>
+                    </a>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Paginación */}
+      <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span> resultados
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          {currentPage > 1 && (
+            <a 
+              href={`/pacientes?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
+              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+            >
+              ← Anterior
+            </a>
+          )}
+          
+          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium">
+            Página {currentPage} de {totalPages}
+          </span>
+
+          {currentPage < totalPages && (
+            <a 
+              href={`/pacientes?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
+              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+            >
+              Siguiente →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</DashboardLayout>
