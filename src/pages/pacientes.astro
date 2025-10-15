@@ -69,17 +69,17 @@ function getCCAANombre(ccaa: number): string {
 ---
 
 <DashboardLayout title="Gestión de Pacientes" activePage="pacientes">
-  <div class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+  <div class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden w-full">
     
-    <div class="mb-6">
-      <h2 class="text-2xl sm:text-3xl font-bold mb-2">Gestión de Pacientes</h2>
-      <p class="text-gray-600 dark:text-gray-400">
+    <div class="mb-4 sm:mb-6">
+      <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">Gestión de Pacientes</h2>
+      <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
         Listado de {totalPacientes.toLocaleString()} pacientes del sistema
       </p>
     </div>
 
     {/* Formulario de filtros */}
-    <form method="get" class="mb-6">
+    <form method="get" class="mb-4 sm:mb-6">
       {/* Barra de búsqueda */}
       <div class="mb-4">
         <div class="relative">
@@ -91,13 +91,13 @@ function getCCAANombre(ccaa: number): string {
             name="search"
             value={searchQuery}
             placeholder="Buscar por ID o diagnóstico..." 
-            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            class="w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
           />
         </div>
       </div>
 
       {/* Filtros */}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-4">
         {/* Filtro por Sexo */}
         <div class="flex flex-col gap-2">
           <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="sexo">

@@ -141,7 +141,7 @@ const { title, activePage } = Astro.props;
   </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-[#1F2937] dark:text-gray-200">
-  <div class="relative flex min-h-screen w-full">
+  <div class="relative flex min-h-screen w-full max-w-full overflow-x-hidden">
     
     {/* SIDEBAR - Visible en pantallas grandes (a la IZQUIERDA) */}
     <aside class="hidden xl:flex xl:flex-col xl:w-64 xl:min-w-64 xl:max-w-64 xl:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
@@ -223,18 +223,18 @@ const { title, activePage } = Astro.props;
     </aside>
 
     {/* CONTENIDO PRINCIPAL */}
-    <div class="flex flex-col flex-1">
+    <div class="flex flex-col flex-1 min-w-0">
       
       {/* HEADER SUPERIOR - Visible SIEMPRE (en todas las resoluciones) */}
-      <header class="flex items-center justify-between px-4 sm:px-8 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+      <header class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
         {/* Logo y título - Solo visible en móvil/tablet */}
-        <div class="flex items-center gap-3 xl:hidden">
-          <div class="text-primary">
-            <span class="material-symbols-outlined" style="font-size: 32px;">health_and_safety</span>
+        <div class="flex items-center gap-2 xl:hidden min-w-0 flex-shrink">
+          <div class="text-primary flex-shrink-0">
+            <span class="material-symbols-outlined" style="font-size: 28px;">health_and_safety</span>
           </div>
-          <div class="flex flex-col">
-            <h1 class="text-base sm:text-lg font-bold header-title">Left Joiners</h1>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Portal de Datos Médicos</p>
+          <div class="flex flex-col min-w-0">
+            <h1 class="text-sm sm:text-base font-bold header-title truncate">Left Joiners</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Portal de Datos Médicos</p>
           </div>
         </div>
 
@@ -244,22 +244,31 @@ const { title, activePage } = Astro.props;
         </div>
 
         {/* Acciones del header */}
-        <div class="flex items-center gap-2 sm:gap-4 ml-auto xl:ml-0 flex-shrink-0">
-          <div class="hidden sm:flex items-center gap-2 rounded-lg h-10 px-3 bg-gray-100 dark:bg-gray-700">
+        <div class="flex items-center gap-2 ml-auto xl:ml-0 flex-shrink-0">
+          <div class="hidden lg:flex items-center gap-2 rounded-lg h-10 px-3 bg-gray-100 dark:bg-gray-700">
             <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">calendar_today</span>
-            <span class="text-sm font-medium">Últimos 30 días</span>
+            <span class="text-sm font-medium whitespace-nowrap">Últimos 30 días</span>
             <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">arrow_drop_down</span>
           </div>
 
           <div 
-            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all" 
+            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all flex-shrink-0" 
             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
           ></div>
+
+          {/* Botón de menú móvil - Solo en pantallas muy pequeñas */}
+          <button 
+            id="mobile-menu-button"
+            class="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+            aria-label="Abrir menú"
+          >
+            <span class="material-symbols-outlined">menu</span>
+          </button>
         </div>
       </header>
 
-      {/* Navegación Horizontal - Solo visible en móvil/tablet */}
-      <nav class="xl:hidden flex items-center gap-2 px-4 sm:px-8 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] overflow-x-auto">
+      {/* Navegación Horizontal - Solo visible en móvil/tablet PERO NO en pantallas muy pequeñas */}
+      <nav class="hidden sm:flex xl:hidden items-center gap-2 px-4 sm:px-6 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] overflow-x-auto">
           <a 
             class={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
               activePage === 'dashboard' 
@@ -311,6 +320,128 @@ const { title, activePage } = Astro.props;
         <slot />
       </main>
     </div>
+
+    {/* Overlay del menú móvil - Solo en pantallas pequeñas */}
+    <div 
+      id="menu-overlay" 
+      class="fixed inset-0 bg-black/50 z-40 sm:hidden hidden transition-opacity"
+    ></div>
+
+    {/* Menú desplegable móvil - Solo en pantallas pequeñas */}
+    <div 
+      id="mobile-menu"
+      class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white dark:bg-[#1F2937] border-l border-gray-200 dark:border-gray-700 z-50 sm:hidden transform translate-x-full transition-transform duration-300 ease-in-out shadow-2xl"
+    >
+      {/* Header del menú */}
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-bold">Menú</h2>
+        <button 
+          id="close-menu-button"
+          class="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          aria-label="Cerrar menú"
+          onclick="document.getElementById('mobile-menu-button').click()"
+        >
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      {/* Información del usuario */}
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+          <div 
+            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12" 
+            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
+          ></div>
+          <div class="flex flex-col flex-1 min-w-0">
+            <p class="text-sm font-medium truncate">Usuario</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">usuario@ejemplo.com</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navegación */}
+      <nav class="flex flex-col gap-2 px-4 py-6">
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'dashboard' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <p class="text-sm font-medium">Dashboard</p>
+        </a>
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'pacientes' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/pacientes"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <p class="text-sm font-medium">Pacientes</p>
+        </a>
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'accesibilidad' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/accesibilidad"
+        >
+          <span class="material-symbols-outlined">accessibility_new</span>
+          <p class="text-sm font-medium">Accesibilidad</p>
+        </a>
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'prueba' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/ejemplo-pacientes"
+        >
+          <span class="material-symbols-outlined">science</span>
+          <p class="text-sm font-medium">Prueba</p>
+        </a>
+      </nav>
+
+      {/* Opciones adicionales */}
+      <div class="absolute bottom-0 left-0 right-0 px-4 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+        <button class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors w-full">
+          <span class="material-symbols-outlined text-red-500">logout</span>
+          <p class="text-sm font-medium text-red-500">Cerrar sesión</p>
+        </button>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // Script para el menú móvil
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const menuOverlay = document.getElementById('menu-overlay');
+      
+      if (menuButton && mobileMenu && menuOverlay) {
+        const toggleMenu = () => {
+          const isOpen = mobileMenu.classList.contains('translate-x-0');
+          if (isOpen) {
+            mobileMenu.classList.remove('translate-x-0');
+            mobileMenu.classList.add('translate-x-full');
+            menuOverlay.classList.add('hidden');
+          } else {
+            mobileMenu.classList.remove('translate-x-full');
+            mobileMenu.classList.add('translate-x-0');
+            menuOverlay.classList.remove('hidden');
+          }
+        };
+        
+        menuButton.addEventListener('click', toggleMenu);
+        menuOverlay.addEventListener('click', toggleMenu);
+      }
+    });
+  </script>
 </body>
 </html>
