@@ -192,24 +192,26 @@ function getCCAANombre(ccaa: number): string {
       </div>
 
       {/* Botones de acción */}
-      <div class="flex gap-3">
+      <div class="flex flex-col sm:flex-row gap-3">
         <button 
           type="submit"
-          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
+          class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center gap-2"
         >
+          <span class="material-symbols-outlined text-lg">filter_alt</span>
           Aplicar Filtros
         </button>
         <a 
           href="/pacientes"
-          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
+          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium text-center flex items-center justify-center gap-2"
         >
+          <span class="material-symbols-outlined text-lg">clear</span>
           Limpiar Filtros
         </a>
       </div>
     </form>
 
-    {/* Tabla de pacientes */}
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+    {/* Tabla de pacientes - Desktop */}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hidden lg:block">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50 dark:bg-gray-700/50">
@@ -306,7 +308,7 @@ function getCCAANombre(ccaa: number): string {
         <div class="text-sm text-gray-600 dark:text-gray-400">
           Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span> resultados
         </div>
-        <div class="flex gap-2 flex-wrap">
+        <div class="flex gap-2 flex-wrap justify-center">
           {currentPage > 1 && (
             <a 
               href={`/pacientes?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
@@ -324,6 +326,110 @@ function getCCAANombre(ccaa: number): string {
             <a 
               href={`/pacientes?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
               class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+            >
+              Siguiente →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* Vista de tarjetas - Móvil y Tablet */}
+    <div class="lg:hidden space-y-4">
+      {pacientesMostrados.length === 0 ? (
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+          <span class="material-symbols-outlined text-4xl mb-2 block text-gray-400">search_off</span>
+          <p class="text-gray-500 dark:text-gray-400">No se encontraron pacientes con los filtros aplicados</p>
+        </div>
+      ) : (
+        pacientesMostrados.map((paciente) => (
+          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="text-lg font-bold text-primary">#{paciente.data.paciente_id}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años</p>
+              </div>
+              <a 
+                href={`/paciente/${paciente.data.paciente_id}`}
+                class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                title="Ver detalles completos"
+              >
+                <span class="material-symbols-outlined text-xl">visibility</span>
+              </a>
+            </div>
+            
+            <div class="space-y-2">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-sm text-gray-400">medical_services</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Diagnóstico</p>
+                    <p class="text-sm font-medium font-mono truncate">{paciente.data.diagnostico_principal}</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-sm text-gray-400">apartment</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Servicio</p>
+                    <p class="text-sm font-medium truncate">{paciente.data.servicio}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-sm text-gray-400">schedule</span>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Estancia</p>
+                    <p class="text-sm font-medium">{paciente.data.estancia_dias} días</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-sm text-gray-400">calendar_today</span>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Ingreso</p>
+                    <p class="text-sm font-medium">{paciente.data.fecha_ingreso}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-2">
+                <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
+                <div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">CCAA</p>
+                  <p class="text-sm font-medium">{getCCAANombre(paciente.data.ccaa)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+      
+      {/* Paginación móvil */}
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="text-sm text-center text-gray-600 dark:text-gray-400 mb-3">
+          Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span>
+        </div>
+        <div class="flex gap-2 justify-center">
+          {currentPage > 1 && (
+            <a 
+              href={`/pacientes?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
+              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors text-sm"
+            >
+              ← Anterior
+            </a>
+          )}
+          
+          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium text-sm">
+            {currentPage} / {totalPages}
+          </span>
+
+          {currentPage < totalPages && (
+            <a 
+              href={`/pacientes?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
+              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors text-sm"
             >
               Siguiente →
             </a>
