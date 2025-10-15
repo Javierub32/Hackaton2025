@@ -144,7 +144,7 @@ const { title, activePage } = Astro.props;
   <div class="relative flex min-h-screen w-full">
     
     {/* SIDEBAR - Visible en pantallas grandes (a la IZQUIERDA) */}
-    <aside class="hidden xl:flex xl:flex-col xl:w-80 xl:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+    <aside class="hidden xl:flex xl:flex-col xl:w-64 xl:min-w-64 xl:max-w-64 xl:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
       {/* Header del Sidebar - Misma altura que el header superior */}
       <div class="flex items-center px-6 border-b border-gray-200 dark:border-gray-700 h-[73px]">
         <div class="flex items-center gap-3">
@@ -205,7 +205,7 @@ const { title, activePage } = Astro.props;
           <p class="text-sm font-medium">Prueba</p>
         </a>
       </nav>
-
+	  
       {/* User Info - Footer del Sidebar */}
       <div class="mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
@@ -218,6 +218,7 @@ const { title, activePage } = Astro.props;
             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">usuario@ejemplo.com</p>
           </div>
         </div>
+		
       </div>
     </aside>
 
@@ -238,21 +239,18 @@ const { title, activePage } = Astro.props;
         </div>
 
         {/* Título de la página - Solo visible en desktop cuando hay sidebar */}
-        <div class="hidden xl:block">
-          <h2 class="text-xl font-bold page-title">{title}</h2>
+        <div class="hidden xl:block xl:flex-1 xl:max-w-lg xl:mr-4">
+          <h2 class="text-xl font-bold page-title truncate">{title}</h2>
         </div>
 
         {/* Acciones del header */}
-        <div class="flex items-center gap-2 sm:gap-4 ml-auto">
+        <div class="flex items-center gap-2 sm:gap-4 ml-auto xl:ml-0 flex-shrink-0">
           <div class="hidden sm:flex items-center gap-2 rounded-lg h-10 px-3 bg-gray-100 dark:bg-gray-700">
             <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">calendar_today</span>
             <span class="text-sm font-medium">Últimos 30 días</span>
             <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">arrow_drop_down</span>
           </div>
-          <button class="flex items-center justify-center gap-2 rounded-lg h-10 px-3 sm:px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
-            <span class="material-symbols-outlined text-lg">file_download</span>
-            <span class="hidden sm:inline truncate">Exportar</span>
-          </button>
+
           <div 
             class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all" 
             style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
