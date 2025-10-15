@@ -1,0 +1,121 @@
+---
+// Ejemplo de uso de la Content Collection
+import { getCollection } from 'astro:content';
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+
+// Obtener TODOS los datos de pacientes (21,000 registros cargados en build-time)
+const todosPacientes = await getCollection('datosPrincipales');
+
+// ESTADÍSTICAS usando TODOS los 21,000 registros
+const totalPacientes = todosPacientes.length;
+const pacientesHombres = todosPacientes.filter(p => p.data.sexo === 1).length;
+const pacientesMujeres = todosPacientes.filter(p => p.data.sexo === 2).length;
+
+// Agrupar por servicio (con TODOS los datos)
+const servicios = todosPacientes.reduce((acc, p) => {
+  const servicio = p.data.servicio;
+  acc[servicio] = (acc[servicio] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+// Calcular estancia media (con TODOS los datos)
+const estanciaMedia = (todosPacientes.reduce((sum, p) => sum + p.data.estancia_dias, 0) / totalPacientes).toFixed(1);
+
+// TABLA: Solo mostrar los primeros 10 pacientes
+const pacientesMostrados = todosPacientes.slice(0, 10);
+---
+
+<DashboardLayout title="Datos de Pacientes - Prueba" activePage="prueba">
+  <div class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+    <h1 class="text-3xl font-bold mb-6">Datos Principales de Pacientes</h1>
+    
+    <!-- Nota informativa -->
+    <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+      <p class="text-sm text-yellow-800 dark:text-yellow-200">
+        📊 <strong>Estadísticas calculadas con {totalPacientes.toLocaleString()} registros completos</strong> | 
+        📋 Mostrando solo los primeros {pacientesMostrados.length} pacientes en la tabla
+      </p>
+    </div>
+    
+    <!-- Estadísticas generales -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-blue-100 dark:bg-blue-900/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+        <h2 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Total Pacientes</h2>
+        <p class="text-4xl font-bold text-blue-600 dark:text-blue-400">{totalPacientes.toLocaleString()}</p>
+      </div>
+      
+      <div class="bg-green-100 dark:bg-green-900/30 p-6 rounded-lg border border-green-200 dark:border-green-800">
+        <h2 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Hombres</h2>
+        <p class="text-4xl font-bold text-green-600 dark:text-green-400">{pacientesHombres.toLocaleString()}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{((pacientesHombres/totalPacientes)*100).toFixed(1)}%</p>
+      </div>
+      
+      <div class="bg-pink-100 dark:bg-pink-900/30 p-6 rounded-lg border border-pink-200 dark:border-pink-800">
+        <h2 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Mujeres</h2>
+        <p class="text-4xl font-bold text-pink-600 dark:text-pink-400">{pacientesMujeres.toLocaleString()}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{((pacientesMujeres/totalPacientes)*100).toFixed(1)}%</p>
+      </div>
+
+      <div class="bg-purple-100 dark:bg-purple-900/30 p-6 rounded-lg border border-purple-200 dark:border-purple-800">
+        <h2 class="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">Estancia Media</h2>
+        <p class="text-4xl font-bold text-purple-600 dark:text-purple-400">{estanciaMedia}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">días</p>
+      </div>
+    </div>
+
+    <!-- Distribución por servicio -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold mb-4">Distribución por Servicio</h2>
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        {Object.entries(servicios).map(([servicio, cantidad]) => (
+          <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+            <span class="font-semibold text-gray-800 dark:text-gray-200">{servicio}</span>
+            <span class="text-gray-600 dark:text-gray-400">{cantidad.toLocaleString()} pacientes</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Tabla de pacientes -->
+    <div class="overflow-x-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-bold">Listado de Pacientes</h2>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          Mostrando {pacientesMostrados.length} de {totalPacientes.toLocaleString()} registros
+        </span>
+      </div>
+      <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <thead class="bg-gray-100 dark:bg-gray-700">
+          <tr>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">ID</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Edad</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Sexo</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Servicio</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Diagnóstico</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Estancia (días)</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Fecha Ingreso</th>
+            <th class="px-4 py-3 text-left text-gray-800 dark:text-gray-200">Fecha Alta</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pacientesMostrados.map((paciente, index) => (
+            <tr class={index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-white dark:bg-gray-800'}>
+              <td class="px-4 py-3">{paciente.data.paciente_id}</td>
+              <td class="px-4 py-3">{paciente.data.edad}</td>
+              <td class="px-4 py-3">{paciente.data.sexo === 1 ? 'M' : 'F'}</td>
+              <td class="px-4 py-3">
+                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">
+                  {paciente.data.servicio}
+                </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-sm">{paciente.data.diagnostico_principal}</td>
+              <td class="px-4 py-3 text-center">{paciente.data.estancia_dias}</td>
+              <td class="px-4 py-3">{paciente.data.fecha_ingreso}</td>
+              <td class="px-4 py-3">{paciente.data.fecha_alta}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</DashboardLayout>

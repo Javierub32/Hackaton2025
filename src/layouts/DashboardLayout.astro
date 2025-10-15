@@ -1,0 +1,198 @@
+---
+interface Props {
+  title: string;
+  activePage: 'dashboard' | 'pacientes' | 'accesibilidad' | 'prueba';
+}
+
+const { title, activePage } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} - Left Joiners</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#1F2937] dark:text-gray-200">
+  <div class="relative flex min-h-screen w-full">
+    
+    {/* SIDEBAR - Visible en pantallas grandes (a la IZQUIERDA) */}
+    <aside class="hidden xl:flex xl:flex-col xl:w-80 xl:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+      {/* Header del Sidebar - Misma altura que el header superior */}
+      <div class="flex items-center px-6 border-b border-gray-200 dark:border-gray-700 h-[73px]">
+        <div class="flex items-center gap-3">
+          <div class="text-primary">
+            <span class="material-symbols-outlined" style="font-size: 32px;">health_and_safety</span>
+          </div>
+          <div class="flex flex-col">
+            <h1 class="text-lg font-bold">Left Joiners</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Portal de Datos Médicos</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navegación Vertical */}
+      <nav class="flex flex-col gap-2 px-4 py-6">
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'dashboard' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <p class="text-sm font-medium">Dashboard</p>
+        </a>
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'pacientes' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/pacientes"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <p class="text-sm font-medium">Pacientes</p>
+        </a>
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'accesibilidad' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/accesibilidad"
+        >
+          <span class="material-symbols-outlined">accessibility_new</span>
+          <p class="text-sm font-medium">Accesibilidad</p>
+        </a>
+        <a 
+          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            activePage === 'prueba' 
+              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+          href="/ejemplo-pacientes"
+        >
+          <span class="material-symbols-outlined">science</span>
+          <p class="text-sm font-medium">Prueba</p>
+        </a>
+      </nav>
+
+      {/* User Info - Footer del Sidebar */}
+      <div class="mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+          <div 
+            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" 
+            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
+          ></div>
+          <div class="flex flex-col flex-1 min-w-0">
+            <p class="text-sm font-medium truncate">Usuario</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">usuario@ejemplo.com</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    {/* CONTENIDO PRINCIPAL */}
+    <div class="flex flex-col flex-1">
+      
+      {/* HEADER SUPERIOR - Visible SIEMPRE (en todas las resoluciones) */}
+      <header class="flex items-center justify-between px-4 sm:px-8 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+        {/* Logo y título - Solo visible en móvil/tablet */}
+        <div class="flex items-center gap-3 xl:hidden">
+          <div class="text-primary">
+            <span class="material-symbols-outlined" style="font-size: 32px;">health_and_safety</span>
+          </div>
+          <div class="flex flex-col">
+            <h1 class="text-base sm:text-lg font-bold">Left Joiners</h1>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Portal de Datos Médicos</p>
+          </div>
+        </div>
+
+        {/* Título de la página - Solo visible en desktop cuando hay sidebar */}
+        <div class="hidden xl:block">
+          <h2 class="text-xl font-bold">{title}</h2>
+        </div>
+
+        {/* Acciones del header */}
+        <div class="flex items-center gap-2 sm:gap-4 ml-auto">
+          <div class="hidden sm:flex items-center gap-2 rounded-lg h-10 px-3 bg-gray-100 dark:bg-gray-700">
+            <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">calendar_today</span>
+            <span class="text-sm font-medium">Últimos 30 días</span>
+            <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">arrow_drop_down</span>
+          </div>
+          <button class="flex items-center justify-center gap-2 rounded-lg h-10 px-3 sm:px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+            <span class="material-symbols-outlined text-lg">file_download</span>
+            <span class="hidden sm:inline truncate">Exportar</span>
+          </button>
+          <div 
+            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all" 
+            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
+          ></div>
+        </div>
+      </header>
+
+      {/* Navegación Horizontal - Solo visible en móvil/tablet */}
+      <nav class="xl:hidden flex items-center gap-2 px-4 sm:px-8 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] overflow-x-auto">
+          <a 
+            class={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
+              activePage === 'dashboard' 
+                ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+            href="/"
+          >
+            <span class="material-symbols-outlined">dashboard</span>
+            <p class="text-sm font-medium">Dashboard</p>
+          </a>
+          <a 
+            class={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
+              activePage === 'pacientes' 
+                ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+            href="/pacientes"
+          >
+            <span class="material-symbols-outlined">group</span>
+            <p class="text-sm font-medium">Pacientes</p>
+          </a>
+          <a 
+            class={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
+              activePage === 'accesibilidad' 
+                ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+            href="/accesibilidad"
+          >
+            <span class="material-symbols-outlined">accessibility_new</span>
+            <p class="text-sm font-medium">Accesibilidad</p>
+          </a>
+          <a 
+            class={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
+              activePage === 'prueba' 
+                ? 'bg-primary/20 text-primary dark:bg-primary/30' 
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+            href="/ejemplo-pacientes"
+          >
+            <span class="material-symbols-outlined">science</span>
+            <p class="text-sm font-medium">Prueba</p>
+          </a>
+        </nav>
+
+      {/* CONTENIDO DE LA PÁGINA */}
+      <main class="flex-1 flex flex-col overflow-hidden">
+        <slot />
+      </main>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+---
+
+<DashboardLayout title="Dashboard de Salud Pública" activePage="dashboard">
+  <div class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+    
+    {/* Filtros */}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="comunidad">
+          Comunidad Autónoma
+        </label>
+        <select 
+          class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary" 
+          id="comunidad"
+        >
+          <option>Todas</option>
+          <option>Andalucía</option>
+          <option>Cataluña</option>
+          <option>Madrid</option>
+          <option>Valencia</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="edad">
+          Rango de Edad
+        </label>
+        <input 
+          class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:bg-primary" 
+          type="range" 
+          min="0" 
+          max="100" 
+          value="50"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Sexo</label>
+        <div class="flex gap-4">
+          <label class="flex items-center gap-2">
+            <input 
+              type="radio" 
+              name="sexo" 
+              checked 
+              class="text-primary focus:ring-primary"
+            />
+            Todos
+          </label>
+          <label class="flex items-center gap-2">
+            <input 
+              type="radio" 
+              name="sexo" 
+              class="text-primary focus:ring-primary"
+            />
+            Hombres
+          </label>
+          <label class="flex items-center gap-2">
+            <input 
+              type="radio" 
+              name="sexo" 
+              class="text-primary focus:ring-primary"
+            />
+            Mujeres
+          </label>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="periodo">
+          Periodo
+        </label>
+        <input 
+          class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary" 
+          id="periodo" 
+          type="date"
+        />
+      </div>
+    </div>
+
+    {/* Tarjetas de estadísticas */}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-base font-medium text-gray-600 dark:text-gray-400">Total de Ingresos</p>
+        <p class="text-3xl font-bold">12,345</p>
+        <p class="text-base font-medium text-green-500">+5.2% vs mes anterior</p>
+      </div>
+
+      <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-base font-medium text-gray-600 dark:text-gray-400">Estancia Media</p>
+        <p class="text-3xl font-bold">8.2 días</p>
+        <p class="text-base font-medium text-red-500">-0.5% vs mes anterior</p>
+      </div>
+
+      <div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-base font-medium text-gray-600 dark:text-gray-400">Tasa de Mortalidad</p>
+        <p class="text-3xl font-bold">2.1%</p>
+        <p class="text-base font-medium text-green-500">-0.2% vs mes anterior</p>
+      </div>
+    </div>
+
+    {/* Gráficos principales */}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      {/* Ingresos por Comunidad */}
+      <div class="flex flex-col gap-4 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-lg font-bold">Ingresos por Comunidad Autónoma</p>
+        <div class="grid min-h-[250px] grid-flow-col gap-4 grid-rows-[1fr_auto] items-end justify-items-center px-3">
+          <div class="w-full bg-blue-200 dark:bg-blue-800 rounded-t-lg" style="height: 80%;"></div>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Andalucía</p>
+          
+          <div class="w-full bg-green-200 dark:bg-green-800 rounded-t-lg" style="height: 60%;"></div>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Cataluña</p>
+          
+          <div class="w-full bg-yellow-200 dark:bg-yellow-800 rounded-t-lg" style="height: 100%;"></div>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Madrid</p>
+          
+          <div class="w-full bg-blue-200 dark:bg-blue-800 rounded-t-lg" style="height: 75%;"></div>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Valencia</p>
+          
+          <div class="w-full bg-green-200 dark:bg-green-800 rounded-t-lg" style="height: 50%;"></div>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Galicia</p>
+        </div>
+      </div>
+
+      {/* Diagnósticos principales */}
+      <div class="flex flex-col gap-4 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-lg font-bold">Diagnósticos Principales</p>
+        <div class="grid min-h-[250px] gap-x-4 gap-y-4 grid-cols-[auto_1fr_auto] items-center py-3">
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Enf. Isquémica</p>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full">
+            <div class="h-4 bg-primary rounded-full" style="width: 90%;"></div>
+          </div>
+          <p class="text-sm font-bold">1,234</p>
+
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Neumonía</p>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full">
+            <div class="h-4 bg-primary rounded-full" style="width: 80%;"></div>
+          </div>
+          <p class="text-sm font-bold">1,102</p>
+
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Fractura Cadera</p>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full">
+            <div class="h-4 bg-primary rounded-full" style="width: 65%;"></div>
+          </div>
+          <p class="text-sm font-bold">987</p>
+
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">EPOC</p>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full">
+            <div class="h-4 bg-primary rounded-full" style="width: 50%;"></div>
+          </div>
+          <p class="text-sm font-bold">756</p>
+
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Diabetes Mellitus</p>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-full">
+            <div class="h-4 bg-primary rounded-full" style="width: 45%;"></div>
+          </div>
+          <p class="text-sm font-bold">699</p>
+        </div>
+      </div>
+    </div>
+
+    {/* Gráfico de evolución temporal y distribución por sexo */}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+      {/* Evolución temporal */}
+      <div class="lg:col-span-2 flex flex-col gap-4 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-lg font-bold">Evolución Temporal de Ingresos</p>
+        <div class="flex min-h-[250px] flex-1 flex-col gap-8 py-4">
+          <svg fill="none" height="100%" preserveAspectRatio="none" viewBox="0 0 478 150" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_area" x1="239" x2="239" y1="0" y2="150">
+                <stop stop-color="#3B82F6" stop-opacity="0.3"></stop>
+                <stop offset="1" stop-color="#3B82F6" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25V150H0V109Z" fill="url(#paint0_linear_area)"></path>
+            <path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25" stroke="#3B82F6" stroke-linecap="round" stroke-width="3"></path>
+          </svg>
+          <div class="flex justify-around">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ene</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Feb</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Mar</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Abr</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">May</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Jun</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Jul</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Distribución por sexo */}
+      <div class="flex flex-col gap-4 rounded-xl p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <p class="text-lg font-bold">Distribución por Sexo</p>
+        <div class="flex-1 flex items-center justify-center">
+          <div class="relative size-48">
+            <svg class="size-full" viewBox="0 0 36 36">
+              <path 
+                class="text-blue-200 dark:text-blue-800" 
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="4"
+              ></path>
+              <path 
+                class="text-primary" 
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-dasharray="60, 100" 
+                stroke-width="4"
+              ></path>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-2xl font-bold">60%</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">Hombres</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-center gap-6 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="size-3 rounded-full bg-primary"></span>
+            Hombres (60%)
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="size-3 rounded-full bg-blue-200 dark:bg-blue-800"></span>
+            Mujeres (40%)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>
