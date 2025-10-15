@@ -260,11 +260,10 @@ function getCCAANombre(ccaa: number): string {
                   <td class="px-6 py-4 whitespace-nowrap text-sm">
                     {paciente.data.edad} años
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                  <td class="px-4 py-4 whitespace-nowrap text-sm">
+                    <span class={`inline-flex   text-xs rounded-full ${
                       paciente.data.sexo === 1
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400'
+
                     }`}>
                       {getSexoNombre(paciente.data.sexo)}
                     </span>
@@ -273,7 +272,7 @@ function getCCAANombre(ccaa: number): string {
                     {paciente.data.diagnostico_principal}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 rounded text-xs font-medium">
+                    <span class="px-2 py-1 bg-purple-100text-xs font-medium">
                       {paciente.data.servicio}
                     </span>
                   </td>
