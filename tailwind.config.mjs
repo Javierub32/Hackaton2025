@@ -8,8 +8,8 @@ export default {
 		extend: {
 			colors: {
 				"primary": "#3B82F6",
-				"background-light": "#F8F9FA",
-				"background-dark": "#101f22",
+				"background-light": "#FFFFFF",
+				"background-dark": "#0F172A",
 			},
 			fontFamily: {
 				"display": ["Inter", "sans-serif"]

@@ -1,3 +1,7 @@
+---
+import '../styles/global.css';
+---
+
 <!doctype html>
 <html lang="es" class="transition-colors duration-300">
 	<head>
@@ -6,15 +10,87 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro con Modo Oscuro</title>
+		<link href="https://fonts.cdnfonts.com/css/opendyslexic" rel="stylesheet" />
 		<script is:inline>
 			(function() {
-				const theme = localStorage.getItem('theme') || 
-					(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+				const theme = localStorage.getItem('theme') || 'light';
 				if (theme === 'dark') {
 					document.documentElement.classList.add('dark');
+				} else {
+					document.documentElement.classList.remove('dark');
+				}
+				
+				// Aplicar fuente OpenDyslexic si está activada
+				const useDyslexicFont = localStorage.getItem('dyslexic-font') === 'true';
+				if (useDyslexicFont) {
+					document.documentElement.classList.add('dyslexic-font');
 				}
 			})();
 		</script>
+		<style is:global>
+			/* Aplicar OpenDyslexic cuando esté activado - texto general más pequeño */
+			html.dyslexic-font body,
+			html.dyslexic-font p,
+			html.dyslexic-font span,
+			html.dyslexic-font div,
+			html.dyslexic-font input,
+			html.dyslexic-font textarea,
+			html.dyslexic-font select,
+			html.dyslexic-font label,
+			html.dyslexic-font li,
+			html.dyslexic-font td,
+			html.dyslexic-font th {
+				font-family: 'OpenDyslexic', Arial, sans-serif !important;
+				font-size: 90% !important;
+				line-height: 1.6 !important;
+			}
+			
+			/* Títulos con OpenDyslexic */
+			html.dyslexic-font h1 {
+				font-family: 'OpenDyslexic', Arial, sans-serif !important;
+				font-size: 95% !important;
+				line-height: 1.6 !important;
+			}
+			
+			html.dyslexic-font h2 {
+				font-family: 'OpenDyslexic', Arial, sans-serif !important;
+				font-size: 93% !important;
+				line-height: 1.6 !important;
+			}
+			
+			html.dyslexic-font h3,
+			html.dyslexic-font h4,
+			html.dyslexic-font h5,
+			html.dyslexic-font h6 {
+				font-family: 'OpenDyslexic', Arial, sans-serif !important;
+				font-size: 92% !important;
+				line-height: 1.6 !important;
+			}
+			
+			/* Menús de navegación MÁS GRANDES */
+			html.dyslexic-font nav a,
+			html.dyslexic-font nav p,
+			html.dyslexic-font header a,
+			html.dyslexic-font header button {
+				font-family: 'OpenDyslexic', Arial, sans-serif !important;
+				font-size: 105% !important;
+				line-height: 1.6 !important;
+			}
+			
+			/* Enlaces y botones en general */
+			html.dyslexic-font a,
+			html.dyslexic-font button {
+				font-family: 'OpenDyslexic', Arial, sans-serif !important;
+				font-size: 90% !important;
+			}
+			
+			/* NO aplicar a código */
+			html.dyslexic-font code,
+			html.dyslexic-font pre {
+				font-family: monospace !important;
+				font-size: inherit !important;
+			}
+		</style>
 	</head>
 	<body class="bg-white dark:bg-gray-900">
 		<slot />

@@ -14,24 +14,47 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 shadow-sm">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+          <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">palette</span>
             Modo de visualización
           </h3>
-          <p class="mb-4 flex items-center gap-2">Cambia entre el tema claro y oscuro</p>
+          <p class="text-gray-600 dark:text-gray-400">Cambia entre el tema claro y oscuro</p>
         </div>
       
-        <div>
-          <span class="material-symbols-outlined text-primary">light_mode</span>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary text-2xl">light_mode</span>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="dark-mode" class="sr-only peer" />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+            <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
           </label>
-          <span class="material-symbols-outlined text-primary">dark_mode</span>
+          <span class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
         </div>
         
       </div>
 
+    </div>
+
+    {/* Sección de fuente OpenDyslexic */}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">text_fields</span>
+            Fuente para dislexia
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Activa la tipografía OpenDyslexic, diseñada específicamente para mejorar la legibilidad en personas con dislexia
+          </p>
+        </div>
+      
+        <div class="ml-4">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="dyslexic-font-toggle" class="sr-only peer" />
+            <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/25 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+          </label>
+        </div>
+        
+      </div>
     </div>
 
     <!--
@@ -100,81 +123,95 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
   </div>
 </DashboardLayout>
 
-<script is:inline>
-  const matchMedia = window.matchMedia("(prefers-color-scheme: dark)");
-  const darkModeToggle = document.getElementById("dark-mode");
+<script>
+  // Función para obtener el tema actual
+  const getTheme = () => {
+    return localStorage.getItem('theme') || 'light';
+  };
 
-  const getThemePreference = () => {
-    if (typeof localStorage !== "undefined") {
-      return localStorage.getItem("theme") ?? "system";
+  // Función para aplicar el tema
+  const applyTheme = (theme: string) => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-    return matchMedia.matches ? "dark" : "light";
   };
 
-  const updateTheme = () => {
-    const themePreference = getThemePreference();
-    const isDark = themePreference === "dark" || (themePreference === "system" && matchMedia.matches);
-
-    document.documentElement.classList[isDark ? "add" : "remove"]("dark");
-
-    // Actualizar el estado del checkbox
-    darkModeToggle.checked = isDark;
+  // Función para actualizar el toggle
+  const updateToggle = (isDark: boolean) => {
+    const toggle = document.getElementById('dark-mode') as HTMLInputElement;
+    if (toggle) {
+      toggle.checked = isDark;
+    }
   };
 
-  // Inicializar
-  updateTheme();
-  matchMedia.addEventListener("change", updateTheme);
+  // Inicializar cuando cargue el DOM
+  document.addEventListener('DOMContentLoaded', () => {
+    const currentTheme = getTheme();
+    const isDark = currentTheme === 'dark';
+    
+    // Aplicar el tema y actualizar el toggle
+    applyTheme(currentTheme);
+    updateToggle(isDark);
 
-  //Escuchar cambios del checkbox
-  darkModeToggle.addEventListener("change", (e) => {
-    const isDark = e.target.checked;
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-    updateTheme();
-  });
+    // Escuchar cambios en el toggle
+    const darkModeToggle = document.getElementById('dark-mode') as HTMLInputElement;
+    
+    if (darkModeToggle) {
+      darkModeToggle.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const newTheme = target.checked ? 'dark' : 'light';
+        
+        // Guardar en localStorage
+        localStorage.setItem('theme', newTheme);
+        
+        // Aplicar el tema
+        applyTheme(newTheme);
+      });
+    }
 
-  // Evento click en botones de tema
-  document.querySelectorAll(".theme-option").forEach(button => {
-    button.addEventListener("click", () => {
-      localStorage.setItem("theme", button.dataset.theme);
-      updateTheme();
-    });
-  });
+    // Toggle de fuente OpenDyslexic
+    const dyslexicToggle = document.getElementById('dyslexic-font-toggle') as HTMLInputElement;
+    
+    if (dyslexicToggle) {
+      // Inicializar el estado del toggle
+      const isDyslexicActive = localStorage.getItem('dyslexic-font') === 'true';
+      dyslexicToggle.checked = isDyslexicActive;
+      
+      // Escuchar cambios
+      dyslexicToggle.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const isActive = target.checked;
+        
+        // Guardar en localStorage
+        localStorage.setItem('dyslexic-font', isActive.toString());
+        
+        // Aplicar o quitar la clase
+        if (isActive) {
+          document.documentElement.classList.add('dyslexic-font');
+        } else {
+          document.documentElement.classList.remove('dyslexic-font');
+        }
+      });
+    }
 
-  // Tamaño de texto
-  const range = document.getElementById("text-size-range");
-  const textValue = document.getElementById("text-size-value");
-  const textPreview = document.getElementById("text-preview");
-
-  range.addEventListener("input", () => {
-    textValue.textContent = range.value + "%";
-    textPreview.style.fontSize = range.value + "%";
-  });
-
-  /*
-  // Alto contraste
-  const contrastToggle = document.getElementById("high-contrast-toggle");
-  contrastToggle.addEventListener("change", () => {
-    document.body.classList.toggle("high-contrast", contrastToggle.checked);
-  });
-  */
-
-  // Restaurar valores
-  document.getElementById("reset-btn").addEventListener("click", () => {
-    localStorage.removeItem("theme");
-    range.value = 100;
-    textValue.textContent = "100%";
-    textPreview.style.fontSize = "100%";
-    contrastToggle.checked = false;
-    document.body.classList.remove("high-contrast");
-    updateTheme();
+    // Botón de resetear
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        // Resetear al tema claro
+        localStorage.setItem('theme', 'light');
+        applyTheme('light');
+        updateToggle(false);
+        
+        // Resetear fuente OpenDyslexic
+        localStorage.setItem('dyslexic-font', 'false');
+        document.documentElement.classList.remove('dyslexic-font');
+        if (dyslexicToggle) {
+          dyslexicToggle.checked = false;
+        }
+      });
+    }
   });
 </script>
-
-<!--
-<style>
-  /* Modo alto contraste */
-  .high-contrast {
-    filter: contrast(1.5);
-  }
-</style>
--->
