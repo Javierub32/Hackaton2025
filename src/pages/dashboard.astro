@@ -11,14 +11,33 @@ const todosPacientes = await getCollection('datosPrincipales');
 const pacientesHombres = todosPacientes.filter(p => p.data.sexo === 1).length;
 const pacientesMujeres = todosPacientes.filter(p => p.data.sexo === 2).length;
 
-// 2. Distribución por servicio
-const servicios = todosPacientes.reduce((acc, p) => {
-  const servicio = p.data.servicio;
-  acc[servicio] = (acc[servicio] || 0) + 1;
+// 2. Top 10 diagnósticos principales
+const diagnosticos = todosPacientes.reduce((acc, p) => {
+  const diag = p.data.diagnostico_principal;
+  acc[diag] = (acc[diag] || 0) + 1;
   return acc;
 }, {} as Record<string, number>);
 
-// 3. Distribución por edad (grupos)
+const top10Diagnosticos = Object.entries(diagnosticos)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10);
+
+
+// 3. Días de estancia (distribución)
+const estanciaDistribucion = todosPacientes.reduce((acc, p) => {
+  const dias = p.data.estancia_dias;
+  let rango = '';
+  if (dias <= 3) rango = '1-3 días';
+  else if (dias <= 7) rango = '4-7 días';
+  else if (dias <= 14) rango = '8-14 días';
+  else if (dias <= 30) rango = '15-30 días';
+  else rango = 'Más de 30 días';
+  acc[rango] = (acc[rango] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+
+// 4. Distribución por edad (grupos)
 const gruposEdad = todosPacientes.reduce((acc, p) => {
   const edad = p.data.edad;
   let grupo = '';
@@ -32,38 +51,17 @@ const gruposEdad = todosPacientes.reduce((acc, p) => {
   return acc;
 }, {} as Record<string, number>);
 
-// 4. Días de estancia (distribución)
-const estanciaDistribucion = todosPacientes.reduce((acc, p) => {
-  const dias = p.data.estancia_dias;
-  let rango = '';
-  if (dias <= 3) rango = '1-3 días';
-  else if (dias <= 7) rango = '4-7 días';
-  else if (dias <= 14) rango = '8-14 días';
-  else if (dias <= 30) rango = '15-30 días';
-  else rango = 'Más de 30 días';
-  acc[rango] = (acc[rango] || 0) + 1;
-  return acc;
-}, {} as Record<string, number>);
 
-// 5. Top 10 diagnósticos principales
-const diagnosticos = todosPacientes.reduce((acc, p) => {
-  const diag = p.data.diagnostico_principal;
-  acc[diag] = (acc[diag] || 0) + 1;
-  return acc;
-}, {} as Record<string, number>);
 
-const top10Diagnosticos = Object.entries(diagnosticos)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10);
 
-// 6. Distribución por categoría de ingreso
+// 5. Distribución por categoría de ingreso
 const categorias = todosPacientes.reduce((acc, p) => {
   const categoria = p.data.categoria_ingreso_descripcion || 'Sin categoría';
   acc[categoria] = (acc[categoria] || 0) + 1;
   return acc;
 }, {} as Record<string, number>);
 
-// 7. Distribución por comunidad autónoma (top 7)
+// 6. Distribución por comunidad autónoma (top 7)
 const comunidades = todosPacientes.reduce((acc, p) => {
   const ccaa = p.data.ccaa;
   const nombreCCAA = ccaa === 1 ? 'Andalucía' : ccaa === 2 ? 'Aragón' : ccaa === 3 ? 'Asturias' : ccaa === 4 ? 'Baleares' : ccaa === 5 ? 'Canarias' : ccaa === 6 ? 'Cantabria' : ccaa === 7 ? 'Castilla León' : 'Otras';
@@ -97,37 +95,31 @@ const comunidades = todosPacientes.reduce((acc, p) => {
         <div id="chartSexo" style="height: 400px;"></div>
       </div>
 
-      <!-- Gráfica 2: Distribución por Servicio (Bar Chart) -->
+      <!-- Gráfica 2: Top 10 Diagnósticos (Bar Chart) -->
       <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Servicio</h2>
-        <div id="chartServicios" style="height: 400px;"></div>
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Top 10 Diagnósticos Principales</h2>
+        <div id="chartDiagnosticos" style="height: 500px;"></div>
       </div>
 
-      <!-- Gráfica 3: Distribución por Grupos de Edad (Doughnut Chart) -->
-      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Grupos de Edad</h2>
-        <div id="chartEdad" style="height: 400px;"></div>
-      </div>
-
-      <!-- Gráfica 4: Distribución de Estancia (Bar Chart Horizontal) -->
+      <!-- Gráfica 3: Distribución de Estancia (Bar Chart Horizontal) -->
       <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución de Días de Estancia</h2>
         <div id="chartEstancia" style="height: 400px;"></div>
       </div>
 
-      <!-- Gráfica 5: Top 10 Diagnósticos (Bar Chart) -->
-      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700 lg:col-span-2">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Top 10 Diagnósticos Principales</h2>
-        <div id="chartDiagnosticos" style="height: 500px;"></div>
+      <!-- Gráfica 4: Distribución por Grupos de Edad (Doughnut Chart) -->
+      <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Grupos de Edad</h2>
+        <div id="chartEdad" style="height: 400px;"></div>
       </div>
 
-      <!-- Gráfica 6: Distribución por Categoría de Ingreso (Radar Chart) -->
+      <!-- Gráfica 5: Distribución por Categoría de Ingreso (Radar Chart) -->
       <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Categoría</h2>
         <div id="chartCategorias" style="height: 400px;"></div>
       </div>
 
-      <!-- Gráfica 7: Distribución por Comunidad Autónoma (Pie Chart) -->
+      <!-- Gráfica 6: Distribución por Comunidad Autónoma (Pie Chart) -->
       <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por CCAA</h2>
         <div id="chartComunidades" style="height: 400px;"></div>
@@ -164,6 +156,7 @@ const comunidades = todosPacientes.reduce((acc, p) => {
   // Gráfica 1: Distribución por Sexo (Pie Chart)
   const chartSexo = echarts.init(document.getElementById('chartSexo'));
   chartSexo.setOption({
+    color: ['#3B82F6', '#EC4899'],
     tooltip: {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)'
@@ -196,44 +189,7 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     ]
   });
 
-  // Gráfica 2: Distribución por Servicio (Bar Chart)
-  const chartServicios = echarts.init(document.getElementById('chartServicios'));
-  chartServicios.setOption({
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: Object.keys(window.serviciosData),
-      axisLabel: { color: currentColors.text }
-    },
-    yAxis: {
-      type: 'value',
-      axisLabel: { color: currentColors.text }
-    },
-    series: [
-      {
-        name: 'Pacientes',
-        type: 'bar',
-        data: Object.values(window.serviciosData),
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#83bff6' },
-            { offset: 1, color: '#188df0' }
-          ])
-        }
-      }
-    ]
-  });
-
-  // Gráfica 3: Distribución por Grupos de Edad (Doughnut)
+  // Gráfica 4: Distribución por Grupos de Edad (Doughnut)
   const chartEdad = echarts.init(document.getElementById('chartEdad'));
   chartEdad.setOption({
     tooltip: {
@@ -279,8 +235,14 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     ]
   });
 
-  // Gráfica 4: Distribución de Estancia (Bar Chart Horizontal)
+  // Gráfica 3: Distribución de Estancia (Bar Chart Horizontal)
   const chartEstancia = echarts.init(document.getElementById('chartEstancia'));
+
+  //Para el orden de aparición que salgan bien:
+  const ordenRangos = ['Más de 30 días', '15-30 días', '8-14 días','4-7 días','1-3 días'];
+  const categoriasOrdenadas = ordenRangos.filter(r => window.estanciaData[r] !== undefined);
+  const valoresOrdenados = categoriasOrdenadas.map(r => window.estanciaData[r]);
+
   chartEstancia.setOption({
     tooltip: {
       trigger: 'axis',
@@ -298,25 +260,22 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     },
     yAxis: {
       type: 'category',
-      data: Object.keys(window.estanciaData),
+      data: categoriasOrdenadas,
       axisLabel: { color: currentColors.text }
     },
     series: [
       {
         name: 'Pacientes',
         type: 'bar',
-        data: Object.values(window.estanciaData),
+        data: valoresOrdenados,
         itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-            { offset: 0, color: '#f093fb' },
-            { offset: 1, color: '#f5576c' }
-          ])
+          color: '#FC4747'
         }
       }
     ]
   });
 
-  // Gráfica 5: Top 10 Diagnósticos (Bar Chart)
+  // Gráfica 2: Top 10 Diagnósticos (Bar Chart)
   const chartDiagnosticos = echarts.init(document.getElementById('chartDiagnosticos'));
   chartDiagnosticos.setOption({
     tooltip: {
@@ -347,16 +306,13 @@ const comunidades = todosPacientes.reduce((acc, p) => {
         type: 'bar',
         data: window.diagnosticosData.map((d: any) => d[1]),
         itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-            { offset: 0, color: '#4facfe' },
-            { offset: 1, color: '#00f2fe' }
-          ])
+          color: '#3B82F6'
         }
       }
     ]
   });
 
-  // Gráfica 6: Distribución por Categoría (Radar Chart)
+  // Gráfica 5: Distribución por Categoría (Radar Chart)
   const chartCategorias = echarts.init(document.getElementById('chartCategorias'));
   const categoriaIndicators = Object.entries(window.categoriasData).map(([key, value]) => ({
     name: key.length > 30 ? key.substring(0, 30) + '...' : key,
@@ -389,9 +345,10 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     ]
   });
 
-  // Gráfica 7: Distribución por Comunidad Autónoma (Pie Chart)
+  // Gráfica 6: Distribución por Comunidad Autónoma (Pie Chart)
   const chartComunidades = echarts.init(document.getElementById('chartComunidades'));
   chartComunidades.setOption({
+    color:['#702EFF', '#CEFF2E'],
     tooltip: {
       trigger: 'item',
       formatter: '{b}: {c} ({d}%)'
@@ -427,7 +384,6 @@ const comunidades = todosPacientes.reduce((acc, p) => {
   // Hacer las gráficas responsive
   window.addEventListener('resize', () => {
     chartSexo.resize();
-    chartServicios.resize();
     chartEdad.resize();
     chartEstancia.resize();
     chartDiagnosticos.resize();
@@ -438,7 +394,6 @@ const comunidades = todosPacientes.reduce((acc, p) => {
 
 <script is:inline define:vars={{ 
   sexoData: { hombres: pacientesHombres, mujeres: pacientesMujeres },
-  serviciosData: servicios,
   edadData: gruposEdad,
   estanciaData: estanciaDistribucion,
   diagnosticosData: top10Diagnosticos,
@@ -446,7 +401,6 @@ const comunidades = todosPacientes.reduce((acc, p) => {
   comunidadesData: comunidades
 }}>
   window.sexoData = sexoData;
-  window.serviciosData = serviciosData;
   window.edadData = edadData;
   window.estanciaData = estanciaData;
   window.diagnosticosData = diagnosticosData;
