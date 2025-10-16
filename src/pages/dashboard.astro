@@ -5,15 +5,13 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
 // Obtener TODOS los datos de pacientes
 const todosPacientes = await getCollection('datosPrincipales');
 
-// Preparar datos para las gráficas
-
 // 4. Distribución por sexo
 const pacientesHombres = todosPacientes.filter(p => p.data.sexo === 1).length;
 const pacientesMujeres = todosPacientes.filter(p => p.data.sexo === 2).length;
 
 // 2. Top 10 diagnósticos principales
 const diagnosticos = todosPacientes.reduce((acc, p) => {
-  const diag = p.data.diagnostico_principal;
+  const diag = p.data.diagnostico_principal || 'Sin especificar';
   acc[diag] = (acc[diag] || 0) + 1;
   return acc;
 }, {} as Record<string, number>);
@@ -22,10 +20,9 @@ const top10Diagnosticos = Object.entries(diagnosticos)
   .sort((a, b) => b[1] - a[1])
   .slice(0, 10);
 
-
 // 3. Días de estancia (distribución)
 const estanciaDistribucion = todosPacientes.reduce((acc, p) => {
-  const dias = p.data.estancia_dias;
+  const dias = p.data.estancia_dias ?? 0;
   let rango = '';
   if (dias <= 3) rango = '1-3 días';
   else if (dias <= 7) rango = '4-7 días';
@@ -36,10 +33,9 @@ const estanciaDistribucion = todosPacientes.reduce((acc, p) => {
   return acc;
 }, {} as Record<string, number>);
 
-
 // 1. Distribución por edad (grupos)
 const gruposEdad = todosPacientes.reduce((acc, p) => {
-  const edad = p.data.edad;
+  const edad = p.data.edad ?? 0;
   let grupo = '';
   if (edad < 18) grupo = '0-17';
   else if (edad < 30) grupo = '18-29';
@@ -50,9 +46,6 @@ const gruposEdad = todosPacientes.reduce((acc, p) => {
   acc[grupo] = (acc[grupo] || 0) + 1;
   return acc;
 }, {} as Record<string, number>);
-
-
-
 
 // 5. Distribución por categoría de ingreso
 const categorias = todosPacientes.reduce((acc, p) => {
@@ -65,8 +58,6 @@ const categorias = todosPacientes.reduce((acc, p) => {
 const comunidades = todosPacientes.reduce((acc, p) => {
   const ccaa = p.data.ccaa;
   let nombreCCAA = '';
-  
-  // Mapeo basado en los códigos reales de la base de datos
   switch(ccaa) {
     case 1: nombreCCAA = 'Andalucía'; break;
     case 2: nombreCCAA = 'La Rioja'; break;
@@ -89,21 +80,41 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     case 19: nombreCCAA = 'Melilla'; break;
     default: nombreCCAA = 'Sin especificar'; break;
   }
-  
   acc[nombreCCAA] = (acc[nombreCCAA] || 0) + 1;
   return acc;
 }, {} as Record<string, number>);
 ---
 
+<style>
+  /* Oculta visualmente pero permite foco con Tab (aparece al enfocar) */
+  .sr-only.focusable {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0);
+    white-space: nowrap; border: 0;
+  }
+  .sr-only.focusable:focus,
+  .sr-only.focusable:focus-within {
+    position: static; width: auto; height: auto;
+    margin: 0; overflow: visible; clip: auto; white-space: normal;
+    background: var(--tbl-bg, #fff);
+    color: var(--tbl-fg, #111);
+    padding: 1rem; border-radius: 0.5rem;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.4);
+  }
+  :root.dark .sr-only.focusable:focus,
+  :root.dark .sr-only.focusable:focus-within {
+    --tbl-bg: #1f2937; --tbl-fg: #e5e7eb;
+  }
+</style>
 
 <DashboardLayout title="Dashboard de Salud Pública" activePage="dashboard">
   <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-
-    {/* Sección de bienvenida */}
     <header class="mb-8 lg:mb-10">
       <h1 class="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
-        ¡Bienvenido al Portal de Datos Médicos!  
-        <span class="material-symbols-outlined text-4xl text-blue-500">emoji_people</span>
+        ¡Bienvenido al Portal de Datos Médicos!
+        <span class="material-symbols-outlined text-4xl text-blue-500" aria-hidden="true">emoji_people</span>
       </h1>
       <p class="text-gray-600 dark:text-gray-400 max-w-2xl">
         Consulta las métricas de salud en tiempo real, analiza los ingresos hospitalarios 
@@ -114,260 +125,353 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     <!-- Grid de gráficas -->
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-       <!-- Gráfica 1: Distribución por Grupos de Edad (Doughnut Chart) -->
-      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Grupos de Edad</h2>
-        <div id="chartEdad" style="height: 400px;"></div>
+      <!-- Gráfica 1: Edad -->
+      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+               role="region" aria-labelledby="h2-edad">
+        <h2 id="h2-edad" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Distribución por Grupos de Edad
+        </h2>
+
+        <p id="desc-edad" class="sr-only">
+          Muestra la distribución de pacientes por grupos de edad: 0-17, 18-29, 30-44, 45-59, 60-74, 75+.
+          Puedes tabular hasta la tabla para leer los datos numéricos.
+        </p>
+
+        <div id="chartEdad"
+             role="img"
+             aria-labelledby="h2-edad"
+             aria-describedby="desc-edad"
+             tabindex="0"
+             style="height: 400px;"></div>
+
+        <!-- Tabla accesible (oculta visualmente, aparece al enfocar con Tab) -->
+        <div id="tbl-edad" class="sr-only focusable mt-4" tabindex="-1">
+          <table class="min-w-full text-sm">
+            <caption class="font-semibold mb-2">Datos de la distribución por grupos de edad</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="text-left">Grupo</th>
+                <th scope="col" class="text-left">Pacientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(gruposEdad).map(([g, v]) => (
+                <tr>
+                  <th scope="row" class="font-medium">{g}</th>
+                  <td>{v}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </article>
 
-      <!-- Gráfica 2: Top 10 Diagnósticos (Bar Chart) -->
-      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Top 10 Diagnósticos Principales</h2>
-        <div id="chartDiagnosticos" style="height: 500px;"></div>
+      <!-- Gráfica 2: Diagnósticos -->
+      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+               role="region" aria-labelledby="h2-dx">
+        <h2 id="h2-dx" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Top 10 Diagnósticos Principales
+        </h2>
+
+        <p id="desc-dx" class="sr-only">Diagnósticos más frecuentes y su número de casos. Tabula para acceder a la tabla.</p>
+
+        <div id="chartDiagnosticos"
+             role="img"
+             aria-labelledby="h2-dx"
+             aria-describedby="desc-dx"
+             tabindex="0"
+             style="height: 500px;"></div>
+
+        <div id="tbl-dx" class="sr-only focusable mt-4" tabindex="-1">
+          <table class="min-w-full text-sm">
+            <caption class="font-semibold mb-2">Top 10 diagnósticos principales</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="text-left">Diagnóstico</th>
+                <th scope="col" class="text-left">Casos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {top10Diagnosticos.map(([dx, n]) => (
+                <tr>
+                  <th scope="row" class="font-medium">{dx}</th>
+                  <td>{n}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </article>
 
-      <!-- Gráfica 3: Distribución de Estancia (Bar Chart Horizontal) -->
-      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución de Días de Estancia</h2>
-        <div id="chartEstancia" style="height: 400px;"></div>
+      <!-- Gráfica 3: Estancia -->
+      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+               role="region" aria-labelledby="h2-est">
+        <h2 id="h2-est" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Distribución de Días de Estancia
+        </h2>
+
+        <p id="desc-est" class="sr-only">
+          Recuento de pacientes por rangos de días de estancia: 1-3, 4-7, 8-14, 15-30, más de 30. Tabula para ver la tabla.
+        </p>
+
+        <div id="chartEstancia"
+             role="img"
+             aria-labelledby="h2-est"
+             aria-describedby="desc-est"
+             tabindex="0"
+             style="height: 400px;"></div>
+
+        <div id="tbl-est" class="sr-only focusable mt-4" tabindex="-1">
+          <table class="min-w-full text-sm">
+            <caption class="font-semibold mb-2">Distribución por rangos de estancia</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="text-left">Rango</th>
+                <th scope="col" class="text-left">Pacientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(estanciaDistribucion).map(([r, n]) => (
+                <tr>
+                  <th scope="row" class="font-medium">{r}</th>
+                  <td>{n}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </article>
 
+      <!-- Gráfica 4: Sexo -->
+      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+               role="region" aria-labelledby="h2-sexo">
+        <h2 id="h2-sexo" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Distribución por Sexo
+        </h2>
 
-       <!-- Gráfica 4: Distribución por Sexo (Pie Chart) -->
-      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Sexo</h2>
-        <div id="chartSexo" style="height: 400px;"></div>
+        <p id="desc-sexo" class="sr-only">Porcentajes y recuentos de pacientes hombres y mujeres. Tabula para ver la tabla.</p>
+
+        <div id="chartSexo"
+             role="img"
+             aria-labelledby="h2-sexo"
+             aria-describedby="desc-sexo"
+             tabindex="0"
+             style="height: 400px;"></div>
+
+        <div id="tbl-sexo" class="sr-only focusable mt-4" tabindex="-1">
+          <table class="min-w-full text-sm">
+            <caption class="font-semibold mb-2">Distribución por sexo</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="text-left">Sexo</th>
+                <th scope="col" class="text-left">Pacientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row" class="font-medium">Hombres</th><td>{pacientesHombres}</td></tr>
+              <tr><th scope="row" class="font-medium">Mujeres</th><td>{pacientesMujeres}</td></tr>
+            </tbody>
+          </table>
+        </div>
       </article>
 
+      <!-- Gráfica 5: Categorías -->
+      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+               role="region" aria-labelledby="h2-cat">
+        <h2 id="h2-cat" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Distribución por Categoría
+        </h2>
 
-      <!-- Gráfica 5: Distribución por Categoría de Ingreso (Radar Chart) -->
-      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por Categoría</h2>
-        <div id="chartCategorias" style="height: 400px;"></div>
+        <p id="desc-cat" class="sr-only">Radar con recuentos de pacientes por categoría de ingreso. Tabula para ver la tabla.</p>
+
+        <div id="chartCategorias"
+             role="img"
+             aria-labelledby="h2-cat"
+             aria-describedby="desc-cat"
+             tabindex="0"
+             style="height: 400px;"></div>
+
+        <div id="tbl-cat" class="sr-only focusable mt-4" tabindex="-1">
+          <table class="min-w-full text-sm">
+            <caption class="font-semibold mb-2">Distribución por categoría de ingreso</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="text-left">Categoría</th>
+                <th scope="col" class="text-left">Pacientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(categorias).map(([c, n]) => (
+                <tr>
+                  <th scope="row" class="font-medium">{c}</th>
+                  <td>{n}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </article>
 
-      <!-- Gráfica 6: Distribución por Comunidad Autónoma (Pie Chart) -->
-      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Distribución por CCAA</h2>
-        <div id="chartComunidades" style="height: 400px;"></div>
+      <!-- Gráfica 6: CCAA -->
+      <article class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700"
+               role="region" aria-labelledby="h2-ccaa">
+        <h2 id="h2-ccaa" class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+          Distribución por CCAA
+        </h2>
+
+        <p id="desc-ccaa" class="sr-only">Reparto de pacientes por comunidades autónomas. Tabula para ver la tabla.</p>
+
+        <div id="chartComunidades"
+             role="img"
+             aria-labelledby="h2-ccaa"
+             aria-describedby="desc-ccaa"
+             tabindex="0"
+             style="height: 400px;"></div>
+
+        <div id="tbl-ccaa" class="sr-only focusable mt-4" tabindex="-1">
+          <table class="min-w-full text-sm">
+            <caption class="font-semibold mb-2">Distribución por comunidad autónoma</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="text-left">Comunidad</th>
+                <th scope="col" class="text-left">Pacientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(comunidades).map(([c, n]) => (
+                <tr>
+                  <th scope="row" class="font-medium">{c}</th>
+                  <td>{n}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </article>
 
     </section>
   </main>
 </DashboardLayout>
 
-
-
 <script>
   import * as echarts from 'echarts';
 
-  // Acceder a window con any para evitar errores de TypeScript
-  const w = window as any;
-
-  // Detectar tema oscuro
+  // Detectar tema
   const isDark = document.documentElement.classList.contains('dark');
-  const theme = isDark ? 'dark' : 'light';
+  const currentColors = isDark
+    ? { text: '#d1d5db', background: '#1f2937', grid: '#374151' }
+    : { text: '#374151', background: '#ffffff', grid: '#e5e7eb' };
 
-  // Colores para tema claro y oscuro
-  const colors = {
-    light: {
-      text: '#374151',
-      background: '#ffffff',
-      grid: '#e5e7eb',
-    },
-    dark: {
-      text: '#d1d5db',
-      background: '#1f2937',
-      grid: '#374151',
-    }
-  };
+  // Datos desde el inline script
+  const sexoData = window.sexoData;
+  const edadData = window.edadData;
+  const estanciaData = window.estanciaData;
+  const diagnosticosData = window.diagnosticosData;
+  const categoriasData = window.categoriasData;
+  const comunidadesData = window.comunidadesData;
 
-  const currentColors = isDark ? colors.dark : colors.light;
+  // Util para descripción accesible generada
+  const describePairs = (pairs) => pairs.map(([k, v]) => `${k}: ${v}`).join(', ');
 
-  // Gráfica 4: Distribución por Sexo (Pie Chart)
+  // ==== Gráfica Sexo ====
   const chartSexo = echarts.init(document.getElementById('chartSexo'));
   chartSexo.setOption({
+    aria: {
+      enabled: true,
+      description: `Distribución por sexo: ${describePairs([['Hombres', sexoData.hombres], ['Mujeres', sexoData.mujeres]])}.`
+    },
     color:  ['#3B82F6', '#E377C2'],
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      textStyle: { color: currentColors.text }
-    },
-    series: [
-      {
-        name: 'Distribución por Sexo',
-        type: 'pie',
-        radius: '70%',
-        data: [
-          { value: window.sexoData.hombres, name: 'Hombres' },
-          { value: window.sexoData.mujeres, name: 'Mujeres' }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        },
-        label: {
-          show: false
-        },
-        labelLine: {
-          show: false
-        }
-      }
-    ]
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { orient: 'vertical', left: 'left', textStyle: { color: currentColors.text } },
+    series: [{
+      name: 'Distribución por Sexo',
+      type: 'pie',
+      radius: '70%',
+      data: [
+        { value: sexoData.hombres, name: 'Hombres' },
+        { value: sexoData.mujeres, name: 'Mujeres' }
+      ],
+      emphasis: {
+        itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' }
+      },
+      label: { show: false }, labelLine: { show: false }
+    }]
   });
 
-  // Gráfica 1: Distribución por Grupos de Edad (Doughnut)
+  // ==== Gráfica Edad (doughnut) ====
   const chartEdad = echarts.init(document.getElementById('chartEdad'));
+  const edadOrden = ['0-17', '18-29', '30-44', '45-59', '60-74', '75+'];
+  const edadPairs = Object.entries(edadData).sort((a,b)=>edadOrden.indexOf(a[0])-edadOrden.indexOf(b[0]));
   chartEdad.setOption({
-    color: [    // paleta de colores para personas con DALTONISMO 
-      '#3B82F6', // Azul vivo    
-      '#209E73', // Verde azulado (más visible q el verde normal)
-      '#E5A000', // Amarillo mostaza (visible para protanopes/deuteranopes)  
-      '#E15759', // Rojo coral 
-      '#9E77E5', // Violeta moderado
-      '#E377C2'  // Rosa magenta brillante
-    ], 
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)'
+    aria: {
+      enabled: true,
+      description: `Distribución por grupos de edad: ${describePairs(edadPairs)}.`
     },
-    legend: {
-      orient: 'vertical',
-      right: 'right',
-      textStyle: { color: currentColors.text }
-    },
-    series: [
-      {
-        name: 'Grupos de Edad',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: {
-          borderRadius: 10,
-          borderColor: currentColors.background,
-          borderWidth: 2
-        },
-        label: {
-          show: false,
-          position: 'center'
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: currentColors.text
-          }
-        },
-        labelLine: {
-          show: false
-        },
-        data: Object.entries(window.edadData)
-          .sort((a, b) => {
-            // Orden de los grupos de edad de menor a mayor
-            const orden = ['0-17', '18-29', '30-44', '45-59', '60-74', '75+'];
-            return orden.indexOf(a[0]) - orden.indexOf(b[0]);
-          })
-          .map(([key, value]) => ({
-            value: value,
-            name: key
-          }))
-      }
-    ]
+    color: ['#3B82F6','#209E73','#E5A000','#E15759','#9E77E5','#E377C2'],
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { orient: 'vertical', right: 'right', textStyle: { color: currentColors.text } },
+    series: [{
+      name: 'Grupos de Edad',
+      type: 'pie',
+      radius: ['40%', '70%'],
+      avoidLabelOverlap: false,
+      itemStyle: { borderRadius: 10, borderColor: currentColors.background, borderWidth: 2 },
+      label: { show: false, position: 'center' },
+      emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold', color: currentColors.text } },
+      labelLine: { show: false },
+      data: edadPairs.map(([key, value]) => ({ value, name: key }))
+    }]
   });
 
-  // Gráfica 3: Distribución de Estancia (Bar Chart Horizontal)
+  // ==== Gráfica Estancia (barras horizontales) ====
   const chartEstancia = echarts.init(document.getElementById('chartEstancia'));
-
-  //Para el orden de aparición que salgan bien:
-  const ordenRangos = ['Más de 30 días', '15-30 días', '8-14 días','4-7 días','1-3 días'];
-  const categoriasOrdenadas = ordenRangos.filter(r => window.estanciaData[r] !== undefined);
-  const valoresOrdenados = categoriasOrdenadas.map(r => window.estanciaData[r]);
-
+  const ordenRangos = ['Más de 30 días','15-30 días','8-14 días','4-7 días','1-3 días'];
+  const categoriasOrdenadas = ordenRangos.filter(r => estanciaData[r] !== undefined);
+  const valoresOrdenados = categoriasOrdenadas.map(r => estanciaData[r]);
   chartEstancia.setOption({
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' }
+    aria: {
+      enabled: true,
+      description: `Distribución por días de estancia: ${describePairs(categoriasOrdenadas.map((k,i)=>[k,valoresOrdenados[i]]))}.`
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      axisLabel: { color: currentColors.text }
-    },
-    yAxis: {
-      type: 'category',
-      data: categoriasOrdenadas,
-      axisLabel: { color: currentColors.text }
-    },
-    series: [
-      {
-        name: 'Pacientes',
-        type: 'bar',
-        data: valoresOrdenados,
-        itemStyle: {
-          color: '#E15759'
-        }
-      }
-    ]
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'value', axisLabel: { color: currentColors.text } },
+    yAxis: { type: 'category', data: categoriasOrdenadas, axisLabel: { color: currentColors.text } },
+    series: [{
+      name: 'Pacientes',
+      type: 'bar',
+      data: valoresOrdenados,
+      itemStyle: { color: '#E15759' }
+    }]
   });
 
-  // Gráfica 2: Top 10 Diagnósticos (Bar Chart)
+  // ==== Gráfica Diagnósticos (barras) ====
   const chartDiagnosticos = echarts.init(document.getElementById('chartDiagnosticos'));
   chartDiagnosticos.setOption({
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' }
+    aria: {
+      enabled: true,
+      description: `Top 10 diagnósticos: ${describePairs(diagnosticosData)}.`
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      axisLabel: { color: currentColors.text }
-    },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+    xAxis: { type: 'value', axisLabel: { color: currentColors.text } },
     yAxis: {
       type: 'category',
-      data: window.diagnosticosData.map((d: any) => d[0]),
-      axisLabel: { 
-        color: currentColors.text,
-        fontSize: 11
-      }
+      data: diagnosticosData.map(d => d[0]),
+      axisLabel: { color: currentColors.text, fontSize: 11 }
     },
-    series: [
-      {
-        name: 'Casos',
-        type: 'bar',
-        data: window.diagnosticosData.map((d: any) => d[1]),
-        itemStyle: {
-          color: '#3B82F6'
-        }
-      }
-    ]
+    series: [{
+      name: 'Casos',
+      type: 'bar',
+      data: diagnosticosData.map(d => d[1]),
+      itemStyle: { color: '#3B82F6' }
+    }]
   });
 
-  // Gráfica 5: Distribución por Categoría (Radar Chart con puntos individuales)
+  // ==== Gráfica Categorías (radar) ====
   const chartCategorias = echarts.init(document.getElementById('chartCategorias'));
-  // @ts-ignore
-  const categoriaEntries = Object.entries(window.categoriasData);
-  // @ts-ignore
-  const maxValorCategoria = Math.max(...Object.values(window.categoriasData));
-  
-  // Crear múltiples series, una por cada categoría
+  const categoriaEntries = Object.entries(categoriasData);
+  const maxValorCategoria = Math.max(...Object.values(categoriasData));
   const radarSeries = categoriaEntries.map(([categoria, valor], index) => {
     const values = new Array(categoriaEntries.length).fill(0);
     values[index] = valor;
@@ -376,89 +480,59 @@ const comunidades = todosPacientes.reduce((acc, p) => {
       type: 'radar',
       symbol: 'circle',
       symbolSize: 8,
-      lineStyle: {
-        width: 1.5,
-        opacity: 0.8
-      },
-      areaStyle: {
-        opacity: 0.1
-      },
-      data: [
-        {
-          value: values,
-          name: categoria,
-          itemStyle: {
-            color: `hsl(${(index * 360) / categoriaEntries.length}, 70%, 60%)`
-          }
-        }
-      ]
+      lineStyle: { width: 1.5, opacity: 0.8 },
+      areaStyle: { opacity: 0.1 },
+      data: [{ value: values, name: categoria,
+        itemStyle: { color: `hsl(${(index * 360) / categoriaEntries.length}, 70%, 60%)` } }]
     };
   });
-  
   chartCategorias.setOption({
+    aria: {
+      enabled: true,
+      description: `Distribución por categorías: ${describePairs(categoriaEntries)}.`
+    },
     tooltip: {
-      trigger: 'item',
-      confine: true,
-      appendToBody: true,
-      className: 'custom-tooltip',
-      formatter: function(params: any) {
-        return `<strong>${params.seriesName}</strong><br/>Pacientes: ${params.value.find((v: number) => v > 0) || 0}`;
+      trigger: 'item', confine: true, appendToBody: true, className: 'custom-tooltip',
+      formatter: function(params) {
+        const v = (params.value || []).find((x) => x > 0) || 0;
+        return `<strong>${params.seriesName}</strong><br/>Pacientes: ${v}`;
       },
       extraCssText: 'z-index: 10000;'
     },
-    legend: {
-      show: false
-    },
+    legend: { show: false },
     radar: {
       indicator: categoriaEntries.map(([key]) => ({
-        name: key.length > 15 ? key.substring(0, 15) + '...' : key,
-        max: maxValorCategoria
+        name: key.length > 15 ? key.substring(0, 15) + '…' : key, max: maxValorCategoria
       })),
-      axisName: {
-        color: currentColors.text,
-        fontSize: 11
-      }
+      axisName: { color: currentColors.text, fontSize: 11 }
     },
     series: radarSeries
   });
 
-  // Gráfica 6: Distribución por Comunidad Autónoma (Pie Chart)
+  // ==== Gráfica CCAA (pie) ====
   const chartComunidades = echarts.init(document.getElementById('chartComunidades'));
+  const comunidadesPairs = Object.entries(comunidadesData);
   chartComunidades.setOption({
-    color:['#209E73', '#E5A000'],
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)'
+    aria: {
+      enabled: true,
+      description: `Distribución por comunidades autónomas: ${describePairs(comunidadesPairs)}.`
     },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      textStyle: { color: currentColors.text }
-    },
-    series: [
-      {
-        name: 'Comunidades Autónomas',
-        type: 'pie',
-        radius: '70%',
-        data: Object.entries(window.comunidadesData).map(([key, value]) => ({
-          value: value,
-          name: key
-        })),
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        },
-        label: {
-          color: currentColors.text
-        }
-      }
-    ]
+    color: ['#209E73', '#E5A000'],
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { orient: 'vertical', left: 'left', textStyle: { color: currentColors.text } },
+    series: [{
+      name: 'Comunidades Autónomas',
+      type: 'pie',
+      radius: '70%',
+      data: comunidadesPairs.map(([name, value]) => ({ name, value })),
+      emphasis: {
+        itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' }
+      },
+      label: { color: currentColors.text }
+    }]
   });
 
-  // Hacer las gráficas responsive
+  // Responsive
   window.addEventListener('resize', () => {
     chartSexo.resize();
     chartEdad.resize();

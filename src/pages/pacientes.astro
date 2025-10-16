@@ -65,7 +65,7 @@ const endIndex = Math.min(startIndex + itemsPerPage, totalPacientes);
 
 const pacientesMostrados = pacientesFiltrados.slice(startIndex, endIndex);
 
-// Función para obtener el nombre del sexo
+// Helpers
 function getSexoNombre(sexo: number): string {
   switch (sexo) {
     case 1: return 'Masculino';
@@ -73,8 +73,6 @@ function getSexoNombre(sexo: number): string {
     default: return 'No especificado';
   }
 }
-
-// Función para obtener el nombre de la CCAA
 function getCCAANombre(ccaa: number): string {
   const ccaaMap: Record<number, string> = {
     1: 'Andalucía',
@@ -83,8 +81,6 @@ function getCCAANombre(ccaa: number): string {
   };
   return ccaaMap[ccaa] || `CCAA ${ccaa}`;
 }
-
-// Helpers para paginación accesible (conserva filtros)
 function buildPageLink(n: number) {
   const params = new URLSearchParams(url.searchParams);
   params.set('page', String(n));
@@ -92,8 +88,28 @@ function buildPageLink(n: number) {
 }
 ---
 
+<style>
+  /* Skip link */
+  .skip-link {
+    position: absolute;
+    left: 0.5rem;
+    top: -1000px;
+    padding: .5rem .75rem;
+    background: #111827;
+    color: white;
+    border-radius: .5rem;
+    z-index: 1000;
+  }
+  .skip-link:focus {
+    top: .5rem;
+    outline: 3px solid #3B82F6;
+  }
+</style>
+
 <DashboardLayout title="Gestión de Pacientes" activePage="pacientes">
   <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden w-full space-y-6">
+    {/* Skip link para ir directo a filtros */}
+    <a href="#filtros" class="skip-link">Saltar a filtros de búsqueda</a>
 
     {/* Encabezado */}
     <header>
@@ -103,53 +119,46 @@ function buildPageLink(n: number) {
       </p>
     </header>
 
-    {/* Formulario de filtros con fieldset/legend para evitar label huérfana */}
-    <form method="get" class="space-y-6" aria-labelledby="filtros-title" novalidate>
-      <fieldset class="space-y-4">
-        <legend id="filtros-title" class="text-base sm:text-lg font-semibold">
+    {/* Formulario de filtros accesible */}
+    <form id="filtros" method="get" role="search" class="space-y-6" aria-labelledby="filtros-title" novalidate>
+      <p id="filtros-ayuda" class="sr-only">
+        Usa Tab para recorrer los filtros. Atajos: Alt+Shift+F buscar, X sexo, D diagnóstico, S servicio, C comunidad autónoma, G categoría.
+      </p>
+
+      <fieldset class="space-y-4" aria-describedby="filtros-ayuda">
+        <legend id="filtros-title" class="text-base sm:text-lg font-semibold" tabindex="-1">
           Opciones de búsqueda
         </legend>
 
-        {/* Barra de búsqueda con label asociada y alto contraste de icono/placeholder */}
+        {/* Búsqueda */}
         <div>
           <label for="search" class="sr-only">Buscar por ID de paciente</label>
           <div class="relative">
-            <span
-              class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2
-                     text-slate-700 dark:text-slate-200 pointer-events-none"
-              aria-hidden="true"
-            >
-              search
-            </span>
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 dark:text-slate-200 pointer-events-none" aria-hidden="true">search</span>
             <input
               id="search"
               type="text"
               name="search"
               value={searchQuery}
-              placeholder="Buscar por ID de paciente..."
-              aria-describedby={searchError ? 'search-error' : undefined}
+              placeholder="Buscar por ID de paciente…"
+              aria-describedby={searchError ? 'search-error filtros-ayuda' : 'filtros-ayuda'}
               aria-errormessage={searchError ? 'search-error' : undefined}
               aria-invalid={searchError ? 'true' : 'false'}
               class={`w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border bg-white dark:bg-gray-800
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                       placeholder:text-slate-600 dark:placeholder:text-slate-300
-                      ${
-                        searchError
-                          ? 'border-red-600 dark:border-red-400 focus-visible:ring-red-600'
-                          : 'border-gray-300 dark:border-gray-600 focus-visible:ring-blue-600'
-                      }`}
+                      ${searchError ? 'border-red-600 dark:border-red-400 focus-visible:ring-red-600' : 'border-gray-300 dark:border-gray-600 focus-visible:ring-blue-600'}`}
               inputmode="numeric"
               pattern="[0-9]*"
               autocomplete="off"
+              accesskey="f"
+              aria-keyshortcuts="Alt+Shift+F"
             />
           </div>
 
-          {/* Región viva para anunciar errores al lector de pantalla */}
           <div
             id="search-error"
-            class={`mt-2 flex items-center gap-2 text-sm ${
-              searchError ? 'text-red-700 dark:text-red-300' : 'sr-only'
-            }`}
+            class={`mt-2 flex items-center gap-2 text-sm ${searchError ? 'text-red-700 dark:text-red-300' : 'sr-only'}`}
             role={searchError ? 'alert' : undefined}
             aria-live={searchError ? 'assertive' : undefined}
           >
@@ -168,6 +177,8 @@ function buildPageLink(n: number) {
               id="sexo"
               autocomplete="off"
               class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+              accesskey="x"
+              aria-keyshortcuts="Alt+Shift+X"
             >
               <option value="">Todos</option>
               <option value="1" selected={sexoFilter === '1'}>Masculino</option>
@@ -183,6 +194,8 @@ function buildPageLink(n: number) {
               id="diagnostico"
               autocomplete="off"
               class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+              accesskey="d"
+              aria-keyshortcuts="Alt+Shift+D"
             >
               <option value="">Todos</option>
               {diagnosticosUnicos.slice(0, 50).map(diag => (
@@ -199,6 +212,8 @@ function buildPageLink(n: number) {
               id="servicio"
               autocomplete="off"
               class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+              accesskey="s"
+              aria-keyshortcuts="Alt+Shift+S"
             >
               <option value="">Todos</option>
               {serviciosUnicos.map(serv => (
@@ -215,6 +230,8 @@ function buildPageLink(n: number) {
               id="ccaa"
               autocomplete="off"
               class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+              accesskey="c"
+              aria-keyshortcuts="Alt+Shift+C"
             >
               <option value="">Todas</option>
               {ccaaUnicas.map(ccaa => (
@@ -233,6 +250,8 @@ function buildPageLink(n: number) {
               id="categoria"
               autocomplete="off"
               class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+              accesskey="g"
+              aria-keyshortcuts="Alt+Shift+G"
             >
               <option value="">Todas</option>
               {categoriasUnicas.map(cat => (
@@ -264,10 +283,10 @@ function buildPageLink(n: number) {
       </fieldset>
     </form>
 
-    {/* Encabezado lógico de la sección de listado para no saltar niveles */}
+    {/* Encabezado lógico de la sección de listado */}
     <h2 id="listado-title" class="sr-only">Listado de pacientes</h2>
 
-    {/* Tabla de pacientes */}
+    {/* Tabla de pacientes (desktop) */}
     <section
       class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hidden lg:block"
       role="region"
@@ -355,10 +374,7 @@ function buildPageLink(n: number) {
           <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
             <header class="flex items-start justify-between mb-3">
               <div>
-                {/* Contraste mejorado para el h3 móvil */}
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-                  #{paciente.data.paciente_id}
-                </h3>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">#{paciente.data.paciente_id}</h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                   {getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años
                 </p>
@@ -427,3 +443,17 @@ function buildPageLink(n: number) {
 
   </main>
 </DashboardLayout>
+
+<script>
+  // Mejora: enviar automáticamente al cambiar un select (opcional)
+  // Si no lo quieres, comenta este bloque.
+  const form = document.getElementById('filtros');
+  if (form) {
+    form.querySelectorAll('select').forEach((sel) => {
+      sel.addEventListener('change', () => {
+        // Envío accesible: no interfiere con teclado; Enter/Space siguen funcionando nativo
+        form.submit();
+      });
+    });
+  }
+</script>

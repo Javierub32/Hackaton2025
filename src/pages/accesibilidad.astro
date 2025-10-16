@@ -1,15 +1,16 @@
 ---
 import DashboardLayout from '../layouts/DashboardLayout.astro';
 ---
-
 <DashboardLayout title="Configuración de Accesibilidad" activePage="accesibilidad">
   <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6">
-
     {/* Encabezado */}
     <header class="mb-8">
       <h2 class="text-2xl sm:text-3xl font-bold mb-2">Configuración de Accesibilidad</h2>
       <p class="text-gray-600 dark:text-gray-400">Personaliza la interfaz según tus necesidades</p>
     </header>
+
+    {/* Región de anuncios accesibles */}
+    <div id="a11y-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
     {/* Sección: Tema visual */}
     <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm flex items-center justify-between">
@@ -22,23 +23,28 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
       </div>
 
       <div class="flex items-center gap-3">
-  <span aria-hidden="true" class="material-symbols-outlined text-primary text-2xl">light_mode</span>
-        <label for="dark-mode" class="flex items-center gap-2 cursor-pointer">
+        <span aria-hidden="true" class="material-symbols-outlined text-primary text-2xl">light_mode</span>
+
+        {/* Label accesible sin texto visible */}
+        <label class="relative inline-flex items-center cursor-pointer">
+          {/* Texto de etiqueta no visible para asociar al control */}
+          <span id="dark-mode-label" class="sr-only">Modo oscuro</span>
+
           <input
             type="checkbox"
             id="dark-mode"
             class="sr-only peer"
             role="switch"
-            aria-label="Alternar modo oscuro"
+            aria-labelledby="dark-mode-label"
             aria-checked="false"
           />
-          <div class="w-14 h-7 bg-gray-200 peer-checked:bg-primary rounded-full relative transition-colors">
-            <div class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-full"></div>
-          </div>
-          
+          <span
+            class="w-14 h-7 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus-visible:ring-4 peer-focus-visible:ring-primary/25 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600"
+            aria-hidden="true"
+          ></span>
         </label>
 
-  <span aria-hidden="true" class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
+        <span aria-hidden="true" class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
       </div>
     </section>
 
@@ -55,108 +61,111 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
       </article>
 
       <label class="relative inline-flex items-center cursor-pointer ml-4">
-        <input type="checkbox" id="dyslexic-font-toggle" class="sr-only peer" />
-        <span class="w-14 h-7 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-focus:ring-primary/25 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600"></span>
+        {/* Texto de etiqueta no visible para asociar al control */}
+        <span id="dyslexic-font-label" class="sr-only">Activar fuente para dislexia</span>
+
+        <input
+          type="checkbox"
+          id="dyslexic-font-toggle"
+          class="sr-only peer"
+          role="switch"
+          aria-labelledby="dyslexic-font-label"
+          aria-checked="false"
+        />
+        <span
+          class="w-14 h-7 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus-visible:ring-4 peer-focus-visible:ring-primary/25 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600"
+          aria-hidden="true"
+        ></span>
       </label>
     </section>
-
   </main>
 </DashboardLayout>
 
 <script>
-  // Función para obtener el tema actual
-  const getTheme = () => {
-    return localStorage.getItem('theme') || 'light';
+  // Funciones de tema
+  const getTheme = () => localStorage.getItem('theme') || 'light';
+  const applyTheme = (theme /**: string */) => {
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   };
-
-  // Función para aplicar el tema
-  const applyTheme = (theme: string) => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+  const announce = (msg /**: string */) => {
+    const region = document.getElementById('a11y-status');
+    if (region) {
+      region.textContent = msg;
+      // Forzar re-anuncio si fuese necesario
+      // region.setAttribute('aria-live', 'polite');
     }
   };
 
-  // Función para actualizar el toggle
-  const updateToggle = (isDark: boolean) => {
-    const toggle = document.getElementById('dark-mode') as HTMLInputElement;
+  // Actualiza atributos ARIA del switch de tema
+  const updateThemeSwitch = (isDark /**: boolean */) => {
+    const toggle = document.getElementById('dark-mode');
     if (toggle) {
       toggle.checked = isDark;
       toggle.setAttribute('aria-checked', String(isDark));
-      toggle.setAttribute('aria-label', isDark ? 'Desactivar modo oscuro' : 'Activar modo oscuro');
     }
   };
 
-  // Inicializar cuando cargue el DOM
   document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar tema
     const currentTheme = getTheme();
     const isDark = currentTheme === 'dark';
-    
-    // Aplicar el tema y actualizar el toggle
     applyTheme(currentTheme);
-    updateToggle(isDark);
+    updateThemeSwitch(isDark);
 
-    // Escuchar cambios en el toggle
-    const darkModeToggle = document.getElementById('dark-mode') as HTMLInputElement;
-    
+    // Listeners
+    const darkModeToggle = document.getElementById('dark-mode');
     if (darkModeToggle) {
       darkModeToggle.addEventListener('change', (e) => {
-        const target = e.target as HTMLInputElement;
+        const target = e.target;
         const newTheme = target.checked ? 'dark' : 'light';
-        
-        // Guardar en localStorage
         localStorage.setItem('theme', newTheme);
-        
-        // Aplicar el tema
         applyTheme(newTheme);
-
-        // Actualizar accesibilidad y etiqueta
         target.setAttribute('aria-checked', String(target.checked));
-        target.setAttribute('aria-label', target.checked ? 'Desactivar modo oscuro' : 'Activar modo oscuro');
+        announce(target.checked ? 'Modo oscuro activado' : 'Modo claro activado');
       });
     }
 
     // Toggle de fuente OpenDyslexic
-    const dyslexicToggle = document.getElementById('dyslexic-font-toggle') as HTMLInputElement;
-    
+    const dyslexicToggle = document.getElementById('dyslexic-font-toggle');
     if (dyslexicToggle) {
-      // Inicializar el estado del toggle
+      // Estado inicial
       const isDyslexicActive = localStorage.getItem('dyslexic-font') === 'true';
       dyslexicToggle.checked = isDyslexicActive;
-      
-      // Escuchar cambios
+      dyslexicToggle.setAttribute('aria-checked', String(isDyslexicActive));
+      if (isDyslexicActive) document.documentElement.classList.add('dyslexic-font');
+
+      // Cambios
       dyslexicToggle.addEventListener('change', (e) => {
-        const target = e.target as HTMLInputElement;
+        const target = e.target;
         const isActive = target.checked;
-        
-        // Guardar en localStorage
-        localStorage.setItem('dyslexic-font', isActive.toString());
-        
-        // Aplicar o quitar la clase
+        localStorage.setItem('dyslexic-font', String(isActive));
+        target.setAttribute('aria-checked', String(isActive));
         if (isActive) {
           document.documentElement.classList.add('dyslexic-font');
+          announce('Fuente para dislexia activada');
         } else {
           document.documentElement.classList.remove('dyslexic-font');
+          announce('Fuente para dislexia desactivada');
         }
       });
     }
 
-    // Botón de resetear
+    // Botón de reset (opcional si existe en la página)
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        // Resetear al tema claro
         localStorage.setItem('theme', 'light');
         applyTheme('light');
-        updateToggle(false);
-        
-        // Resetear fuente OpenDyslexic
+        updateThemeSwitch(false);
         localStorage.setItem('dyslexic-font', 'false');
         document.documentElement.classList.remove('dyslexic-font');
-        if (dyslexicToggle) {
-          dyslexicToggle.checked = false;
+        const dyslexicToggleEl = document.getElementById('dyslexic-font-toggle');
+        if (dyslexicToggleEl) {
+          dyslexicToggleEl.checked = false;
+          dyslexicToggleEl.setAttribute('aria-checked', 'false');
         }
+        announce('Preferencias restablecidas: modo claro y fuente estándar activados');
       });
     }
   });
