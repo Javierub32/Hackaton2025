@@ -33,3 +33,9 @@ a {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
 }
+
+/* Asegurar que los tooltips de ECharts queden por encima del sidebar */
+.custom-tooltip,
+div[class*="echarts-tooltip"] {
+  z-index: 10000 !important;
+}

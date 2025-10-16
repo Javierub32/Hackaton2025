@@ -351,37 +351,64 @@ const comunidades = todosPacientes.reduce((acc, p) => {
     ]
   });
 
-  // Gráfica 6: Distribución por Categoría (Radar Chart)
+  // Gráfica 6: Distribución por Categoría (Radar Chart con puntos individuales)
   const chartCategorias = echarts.init(document.getElementById('chartCategorias'));
-  const categoriaIndicators = Object.entries(window.categoriasData).map(([key, value]) => ({
-    name: key.length > 30 ? key.substring(0, 30) + '...' : key,
-    max: Math.max(...Object.values(window.categoriasData))
-  }));
+  const categoriaEntries = Object.entries(window.categoriasData);
+  const maxValorCategoria = Math.max(...Object.values(window.categoriasData));
+  
+  // Crear múltiples series, una por cada categoría
+  const radarSeries = categoriaEntries.map(([categoria, valor], index) => {
+    const values = new Array(categoriaEntries.length).fill(0);
+    values[index] = valor;
+    return {
+      name: categoria,
+      type: 'radar',
+      symbol: 'circle',
+      symbolSize: 8,
+      lineStyle: {
+        width: 1.5,
+        opacity: 0.8
+      },
+      areaStyle: {
+        opacity: 0.1
+      },
+      data: [
+        {
+          value: values,
+          name: categoria,
+          itemStyle: {
+            color: `hsl(${(index * 360) / categoriaEntries.length}, 70%, 60%)`
+          }
+        }
+      ]
+    };
+  });
   
   chartCategorias.setOption({
-    tooltip: {},
+    tooltip: {
+      trigger: 'item',
+      confine: true,
+      appendToBody: true,
+      className: 'custom-tooltip',
+      formatter: function(params: any) {
+        return `<strong>${params.seriesName}</strong><br/>Pacientes: ${params.value.find((v: number) => v > 0) || 0}`;
+      },
+      extraCssText: 'z-index: 10000;'
+    },
+    legend: {
+      show: false
+    },
     radar: {
-      indicator: categoriaIndicators,
+      indicator: categoriaEntries.map(([key]) => ({
+        name: key.length > 15 ? key.substring(0, 15) + '...' : key,
+        max: maxValorCategoria
+      })),
       axisName: {
         color: currentColors.text,
         fontSize: 11
       }
     },
-    series: [
-      {
-        name: 'Categorías de Ingreso',
-        type: 'radar',
-        data: [
-          {
-            value: Object.values(window.categoriasData),
-            name: 'Pacientes',
-            areaStyle: {
-              color: 'rgba(88, 166, 255, 0.3)'
-            }
-          }
-        ]
-      }
-    ]
+    series: radarSeries
   });
 
   // Gráfica 7: Distribución por Comunidad Autónoma (Pie Chart)
