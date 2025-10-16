@@ -211,44 +211,44 @@ function getCCAANombre(ccaa: number): string {
     </form>
 
     {/* Tabla de pacientes - Desktop */}
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hidden lg:block">
-      <div class="overflow-x-auto">
-        <table class="w-full">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hidden lg:block">
+      <div class="overflow-x-auto overflow-y-visible">
+        <table class="w-full table-fixed">
           <thead class="bg-gray-50 dark:bg-gray-700/50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                ID Paciente
+              <th class="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                ID
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
                 Edad
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
                 Sexo
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Diagnóstico Principal
+              <th class="w-32 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                Diagnóstico
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
                 Servicio
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Estancia (días)
+              <th class="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                Estancia
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Fecha Ingreso
+              <th class="w-28 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                F. Ingreso
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <th class="w-32 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
                 CCAA
               </th>
-              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Acciones
+              <th class="w-20 px-2 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                Ver
               </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             {pacientesMostrados.length === 0 ? (
               <tr>
-                <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                <td colspan="9" class="px-2 py-12 text-center text-gray-500 dark:text-gray-400">
                   <span class="material-symbols-outlined text-4xl mb-2 block">search_off</span>
                   No se encontraron pacientes con los filtros aplicados
                 </td>
@@ -256,44 +256,37 @@ function getCCAANombre(ccaa: number): string {
             ) : (
               pacientesMostrados.map((paciente, i) => (
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <td class="px-2 py-2 text-xs font-medium truncate" title={`#${paciente.data.paciente_id}`}>
                     #{paciente.data.paciente_id}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    {paciente.data.edad} años
+                  <td class="px-2 py-2 text-xs truncate">
+                    {paciente.data.edad}
                   </td>
-                  <td class="px-4 py-4 whitespace-nowrap text-sm">
-                    <span class={`inline-flex   text-xs rounded-full ${
-                      paciente.data.sexo === 1
-
-                    }`}>
-                      {getSexoNombre(paciente.data.sexo)}
-                    </span>
+                  <td class="px-2 py-2 text-xs truncate">
+                    {getSexoNombre(paciente.data.sexo).substring(0, 1)}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                  <td class="px-2 py-2 text-xs font-mono truncate" title={paciente.data.diagnostico_principal}>
                     {paciente.data.diagnostico_principal}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span class="px-2 py-1 bg-purple-100text-xs font-medium">
-                      {paciente.data.servicio}
-                    </span>
+                  <td class="px-2 py-2 text-xs truncate" title={paciente.data.servicio}>
+                    {paciente.data.servicio}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                    {paciente.data.estancia_dias}
+                  <td class="px-2 py-2 text-xs text-center truncate">
+                    {paciente.data.estancia_dias}d
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <td class="px-2 py-2 text-xs truncate">
                     {paciente.data.fecha_ingreso}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <td class="px-2 py-2 text-xs truncate" title={getCCAANombre(paciente.data.ccaa)}>
                     {getCCAANombre(paciente.data.ccaa)}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  <td class="px-2 py-2 text-xs text-center">
                     <a 
                       href={`/paciente/${paciente.data.paciente_id}`}
-                      class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                       title="Ver detalles completos"
                     >
-                      <span class="material-symbols-outlined text-xl">visibility</span>
+                      <span class="material-symbols-outlined text-base">visibility</span>
                     </a>
                   </td>
                 </tr>
