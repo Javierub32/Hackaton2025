@@ -18,6 +18,9 @@ const categoriaFilter = url.searchParams.get('categoria') || '';
 
 const itemsPerPage = 25;
 
+// Validar que el searchQuery sea un número o esté vacío
+const searchError = searchQuery !== '' && !/^\d+$/.test(searchQuery);
+
 // Verificar si hay algún filtro activo
 const hayFiltrosActivos = searchQuery !== '' || sexoFilter !== '' || diagnosticoFilter !== '' || servicioFilter !== '' || ccaaFilter !== '' || categoriaFilter !== '';
 
@@ -30,8 +33,7 @@ const categoriasUnicas = [...new Set(todosPacientes.map(p => p.data.categoria_in
 // Filtrar pacientes
 let pacientesFiltrados = todosPacientes.filter(paciente => {
   const matchSearch = searchQuery === '' || 
-    paciente.data.paciente_id.toString().includes(searchQuery) ||
-    paciente.data.diagnostico_principal.toLowerCase().includes(searchQuery.toLowerCase());
+    paciente.data.paciente_id.toString().includes(searchQuery);
   
   const matchSexo = sexoFilter === '' || paciente.data.sexo.toString() === sexoFilter;
   const matchDiagnostico = diagnosticoFilter === '' || paciente.data.diagnostico_principal === diagnosticoFilter;
@@ -90,17 +92,29 @@ function getCCAANombre(ccaa: number): string {
     {/* Formulario de filtros */}
     <form method="get" class="space-y-6">
       {/* Barra de búsqueda */}
-      <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-          search
-        </span>
-        <input
-          type="text"
-          name="search"
-          value={searchQuery}
-          placeholder="Buscar por ID o diagnóstico..."
-          class="w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
-        />
+      <div>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            search
+          </span>
+          <input
+            type="text"
+            name="search"
+            value={searchQuery}
+            placeholder="Buscar por ID de paciente..."
+            class={`w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border bg-white dark:bg-gray-800 focus:ring-primary ${
+              searchError 
+                ? 'border-red-500 dark:border-red-400 focus:border-red-500' 
+                : 'border-gray-300 dark:border-gray-600 focus:border-primary'
+            }`}
+          />
+        </div>
+        {searchError && (
+          <div class="mt-2 flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
+            <span class="material-symbols-outlined text-base">error</span>
+            <p>Por favor, ingresa solo números para buscar por ID de paciente.</p>
+          </div>
+        )}
       </div>
 
       {/* Filtros */}
@@ -188,7 +202,7 @@ function getCCAANombre(ccaa: number): string {
       <div class="flex flex-col sm:flex-row gap-3">
         <button
           type="submit"
-          class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center gap-2"
+          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-400 dark:text-slate-900 dark:hover:bg-blue-300 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
         >
           <span class="material-symbols-outlined text-lg">filter_alt</span>
           Aplicar Filtros
@@ -292,12 +306,20 @@ function getCCAANombre(ccaa: number): string {
                   {getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años
                 </p>
               </div>
-              <a
-                href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
-                class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-              >
-                <span class="material-symbols-outlined text-xl">visibility</span>
-              </a>
+  <a
+    href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
+    class="group inline-flex items-center justify-center w-10 h-10 rounded-lg
+           bg-blue-600 text-white hover:bg-blue-700
+           dark:bg-blue-400 dark:text-slate-900 dark:hover:bg-blue-300
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+           focus-visible:ring-blue-500 dark:focus-visible:ring-blue-300
+           focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+           transition-colors"
+    aria-label="Ver detalles del paciente"
+  >
+    <span class="material-symbols-outlined text-lg" aria-hidden="true">visibility</span>
+    <span class="sr-only">Ver detalles</span>
+  </a>
             </header>
 
             <dl class="space-y-3 text-sm">
