@@ -197,17 +197,8 @@ const { title, activePage } = Astro.props;
       </nav>
 	  
       {/* User Info - Footer del Sidebar */}
-      <div class="mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <div class="flex items-center gap-3">
-          <div 
-            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" 
-            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
-          ></div>
-          <div class="flex flex-col flex-1 min-w-0">
-            <p class="text-sm font-medium truncate">Usuario</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">usuario@ejemplo.com</p>
-          </div>
-        </div>
+      <div class="mt-auto px-4 py-4 flex-shrink-0">
+
 		
       </div>
     </aside>
@@ -216,7 +207,7 @@ const { title, activePage } = Astro.props;
     <div class="flex flex-col flex-1 min-w-0 xl:ml-64">
       
       {/* HEADER SUPERIOR - Visible SIEMPRE (en todas las resoluciones) - FIXED */}
-      <header class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] sticky top-0 z-10">
+      <header class="flex items-center justify-between px-4 sm:px-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] sticky top-0 z-10 h-[73px]">
         {/* Logo y título - Solo visible en móvil/tablet */}
         <div class="flex items-center gap-2 xl:hidden min-w-0 flex-shrink">
           <div class="text-primary flex-shrink-0">
@@ -238,10 +229,7 @@ const { title, activePage } = Astro.props;
           {/* ----------------------------------------------------------------------------------------------------- borrar?-------------- */}
           
             {/* ----------------------------------------------------------------------------------------------------- borrar?-------------- */}
-          <div 
-            class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all flex-shrink-0" 
-            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAymE-SWFEfdRehjLRi2yiBNuqzT1G2cqM7Eb9ram0Rus2dlG0tNNW3aPbRMkFIeK315X_ixw_MDf_PNjqlKIYMqk3lKpJCO3_Jo2Hjf8zK63nbts0rAPvYB8SHucjKAghQFPbgPkK4yTxm_2jZA3HhcK5QDDx9ah7L9RZgJqbhpQQVBkMYCpUpNvfSDu40yPVFWK2oXHwwweU_s6dbUfINJ8vPDtYGGa0rKgjhA69A7m7oIoYCLSpmWOk1wYu8q_pBSfVVH80gNIo');"
-          ></div>
+
 
           {/* Botón de menú móvil - Solo en pantallas muy pequeñas */}
           <button 
