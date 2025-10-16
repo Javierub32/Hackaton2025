@@ -15,19 +15,30 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
     <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm flex items-center justify-between">
       <div>
         <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary">palette</span>
+          <span aria-hidden="true" class="material-symbols-outlined text-primary">palette</span>
           Modo de visualización
         </h3>
         <p class="text-gray-600 dark:text-gray-400">Cambia entre el tema claro y oscuro</p>
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-primary text-2xl">light_mode</span>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="dark-mode" class="sr-only peer" />
-          <span class="w-14 h-7 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-focus:ring-primary/25 peer-checked:bg-primary relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white dark:border-gray-600"></span>
+  <span aria-hidden="true" class="material-symbols-outlined text-primary text-2xl">light_mode</span>
+        <label for="dark-mode" class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            id="dark-mode"
+            class="sr-only peer"
+            role="switch"
+            aria-label="Alternar modo oscuro"
+            aria-checked="false"
+          />
+          <div class="w-14 h-7 bg-gray-200 peer-checked:bg-primary rounded-full relative transition-colors">
+            <div class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform peer-checked:translate-x-full"></div>
+          </div>
+          
         </label>
-        <span class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
+
+  <span aria-hidden="true" class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
       </div>
     </section>
 
@@ -35,7 +46,7 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
     <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm flex items-center justify-between">
       <article>
         <h3 class="text-xl font-bold mb-2 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary">text_fields</span>
+          <span aria-hidden="true" class="material-symbols-outlined text-primary">text_fields</span>
           Fuente para dislexia
         </h3>
         <p class="text-gray-600 dark:text-gray-400">
@@ -72,6 +83,8 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
     const toggle = document.getElementById('dark-mode') as HTMLInputElement;
     if (toggle) {
       toggle.checked = isDark;
+      toggle.setAttribute('aria-checked', String(isDark));
+      toggle.setAttribute('aria-label', isDark ? 'Desactivar modo oscuro' : 'Activar modo oscuro');
     }
   };
 
@@ -97,6 +110,10 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
         
         // Aplicar el tema
         applyTheme(newTheme);
+
+        // Actualizar accesibilidad y etiqueta
+        target.setAttribute('aria-checked', String(target.checked));
+        target.setAttribute('aria-label', target.checked ? 'Desactivar modo oscuro' : 'Activar modo oscuro');
       });
     }
 
