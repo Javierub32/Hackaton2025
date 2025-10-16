@@ -3,7 +3,7 @@ import '../styles/global.css';
 
 interface Props {
   title: string;
-  activePage: 'dashboard' | 'pacientes' | 'accesibilidad' | 'prueba';
+  activePage: 'dashboard' | 'pacientes' | 'accesibilidad';
 }
 
 const { title, activePage } = Astro.props;
@@ -14,7 +14,7 @@ const { title, activePage } = Astro.props;
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title} - Left Joiners</title>
+  <title>{title} - LeftJoiners</title>
   <link rel="icon" href="/favicon.png" type="image/png" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <link href="https://fonts.cdnfonts.com/css/opendyslexic" rel="stylesheet" />
@@ -144,10 +144,10 @@ const { title, activePage } = Astro.props;
 <body class="bg-background-light dark:bg-background-dark font-display text-[#1F2937] dark:text-gray-200">
   <div class="relative flex min-h-screen w-full max-w-full overflow-x-hidden">
     
-    {/* SIDEBAR - Visible en pantallas grandes (a la IZQUIERDA) */}
-    <aside class="hidden xl:flex xl:flex-col xl:w-64 xl:min-w-64 xl:max-w-64 xl:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+    {/* SIDEBAR - Visible en pantallas grandes (a la IZQUIERDA) - FIXED */}
+    <aside class="hidden xl:flex xl:flex-col xl:w-64 xl:min-w-64 xl:max-w-64 xl:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] xl:fixed xl:left-0 xl:top-0 xl:h-screen xl:overflow-y-auto">
       {/* Header del Sidebar - Misma altura que el header superior */}
-      <div class="flex items-center px-6 border-b border-gray-200 dark:border-gray-700 h-[73px]">
+      <div class="flex items-center px-6 border-b border-gray-200 dark:border-gray-700 h-[73px] flex-shrink-0">
         <div class="flex items-center gap-3">
           <div class="text-primary">
             <span class="material-symbols-outlined" style="font-size: 32px;">health_and_safety</span>
@@ -160,7 +160,7 @@ const { title, activePage } = Astro.props;
       </div>
 
       {/* Navegación Vertical */}
-      <nav class="flex flex-col gap-2 px-4 py-6">
+      <nav class="flex flex-col gap-2 px-4 py-6 flex-1 overflow-y-auto">
         <a 
           class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
             activePage === 'dashboard' 
@@ -194,21 +194,10 @@ const { title, activePage } = Astro.props;
           <span class="material-symbols-outlined">accessibility_new</span>
           <p class="text-sm font-medium">Accesibilidad</p>
         </a>
-        <a 
-          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-            activePage === 'prueba' 
-              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
-              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-          href="/ejemplo-pacientes"
-        >
-          <span class="material-symbols-outlined">science</span>
-          <p class="text-sm font-medium">Prueba</p>
-        </a>
       </nav>
 	  
       {/* User Info - Footer del Sidebar */}
-      <div class="mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="mt-auto px-4 py-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div class="flex items-center gap-3">
           <div 
             class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" 
@@ -223,11 +212,11 @@ const { title, activePage } = Astro.props;
       </div>
     </aside>
 
-    {/* CONTENIDO PRINCIPAL */}
-    <div class="flex flex-col flex-1 min-w-0">
+    {/* CONTENIDO PRINCIPAL - Con margen para el sidebar en desktop */}
+    <div class="flex flex-col flex-1 min-w-0 xl:ml-64">
       
-      {/* HEADER SUPERIOR - Visible SIEMPRE (en todas las resoluciones) */}
-      <header class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937]">
+      {/* HEADER SUPERIOR - Visible SIEMPRE (en todas las resoluciones) - FIXED */}
+      <header class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2937] sticky top-0 z-10">
         {/* Logo y título - Solo visible en móvil/tablet */}
         <div class="flex items-center gap-2 xl:hidden min-w-0 flex-shrink">
           <div class="text-primary flex-shrink-0">
@@ -299,17 +288,6 @@ const { title, activePage } = Astro.props;
           >
             <span class="material-symbols-outlined">accessibility_new</span>
             <p class="text-sm font-medium">Accesibilidad</p>
-          </a>
-          <a 
-            class={`flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
-              activePage === 'prueba' 
-                ? 'bg-primary/20 text-primary dark:bg-primary/30' 
-                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-            href="/ejemplo-pacientes"
-          >
-            <span class="material-symbols-outlined">science</span>
-            <p class="text-sm font-medium">Prueba</p>
           </a>
         </nav>
 
@@ -391,17 +369,6 @@ const { title, activePage } = Astro.props;
         >
           <span class="material-symbols-outlined">accessibility_new</span>
           <p class="text-sm font-medium">Accesibilidad</p>
-        </a>
-        <a 
-          class={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-            activePage === 'prueba' 
-              ? 'bg-primary/20 text-primary dark:bg-primary/30' 
-              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-          href="/ejemplo-pacientes"
-        >
-          <span class="material-symbols-outlined">science</span>
-          <p class="text-sm font-medium">Prueba</p>
         </a>
       </nav>
 
