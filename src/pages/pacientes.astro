@@ -77,42 +77,39 @@ function getCCAANombre(ccaa: number): string {
 ---
 
 <DashboardLayout title="Gestión de Pacientes" activePage="pacientes">
-  <div class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden w-full">
-    
-    <div class="mb-4 sm:mb-6">
-      <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">Gestión de Pacientes</h2>
+  <main class="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden w-full space-y-6">
+
+    {/* Encabezado */}
+    <header>
+      <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mb-1">Gestión de Pacientes</h1>
       <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">
         Listado de {totalPacientes.toLocaleString()} pacientes del sistema
       </p>
-    </div>
+    </header>
 
     {/* Formulario de filtros */}
-    <form method="get" class="mb-4 sm:mb-6">
+    <form method="get" class="space-y-6">
       {/* Barra de búsqueda */}
-      <div class="mb-4">
-        <div class="relative">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            search
-          </span>
-          <input 
-            type="text" 
-            name="search"
-            value={searchQuery}
-            placeholder="Buscar por ID o diagnóstico..." 
-            class="w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
-          />
-        </div>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          search
+        </span>
+        <input
+          type="text"
+          name="search"
+          value={searchQuery}
+          placeholder="Buscar por ID o diagnóstico..."
+          class="w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+        />
       </div>
 
       {/* Filtros */}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-4">
-        {/* Filtro por Sexo */}
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="sexo">
-            Sexo
-          </label>
-          <select 
-            name="sexo" 
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+        {/* Sexo */}
+        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          Sexo
+          <select
+            name="sexo"
             id="sexo"
             class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
           >
@@ -120,53 +117,43 @@ function getCCAANombre(ccaa: number): string {
             <option value="1" selected={sexoFilter === '1'}>Masculino</option>
             <option value="2" selected={sexoFilter === '2'}>Femenino</option>
           </select>
-        </div>
+        </label>
 
-        {/* Filtro por Diagnóstico */}
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="diagnostico">
-            Diagnóstico
-          </label>
-          <select 
-            name="diagnostico" 
+        {/* Diagnóstico */}
+        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          Diagnóstico
+          <select
+            name="diagnostico"
             id="diagnostico"
             class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
           >
             <option value="">Todos</option>
             {diagnosticosUnicos.slice(0, 50).map(diag => (
-              <option value={diag} selected={diagnosticoFilter === diag}>
-                {diag}
-              </option>
+              <option value={diag} selected={diagnosticoFilter === diag}>{diag}</option>
             ))}
           </select>
-        </div>
+        </label>
 
-        {/* Filtro por Servicio */}
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="servicio">
-            Servicio
-          </label>
-          <select 
-            name="servicio" 
+        {/* Servicio */}
+        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          Servicio
+          <select
+            name="servicio"
             id="servicio"
             class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
           >
             <option value="">Todos</option>
             {serviciosUnicos.map(serv => (
-              <option value={serv} selected={servicioFilter === serv}>
-                {serv}
-              </option>
+              <option value={serv} selected={servicioFilter === serv}>{serv}</option>
             ))}
           </select>
-        </div>
+        </label>
 
-        {/* Filtro por CCAA */}
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="ccaa">
-            Comunidad Autónoma
-          </label>
-          <select 
-            name="ccaa" 
+        {/* CCAA */}
+        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          Comunidad Autónoma
+          <select
+            name="ccaa"
             id="ccaa"
             class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
           >
@@ -177,15 +164,13 @@ function getCCAANombre(ccaa: number): string {
               </option>
             ))}
           </select>
-        </div>
+        </label>
 
-        {/* Filtro por Categoría de Ingreso */}
-        <div class="flex flex-col gap-2">
-          <label class="text-sm font-medium text-gray-600 dark:text-gray-400" for="categoria">
-            Categoría de Ingreso
-          </label>
-          <select 
-            name="categoria" 
+        {/* Categoría */}
+        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          Categoría de Ingreso
+          <select
+            name="categoria"
             id="categoria"
             class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
           >
@@ -196,21 +181,21 @@ function getCCAANombre(ccaa: number): string {
               </option>
             ))}
           </select>
-        </div>
-      </div>
+        </label>
+      </section>
 
-      {/* Botones de acción */}
+      {/* Botones */}
       <div class="flex flex-col sm:flex-row gap-3">
-        <button 
+        <button
           type="submit"
           class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center gap-2"
         >
           <span class="material-symbols-outlined text-lg">filter_alt</span>
           Aplicar Filtros
         </button>
-        <a 
+        <a
           href="/pacientes"
-          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium text-center flex items-center justify-center gap-2"
+          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium flex items-center justify-center gap-2"
         >
           <span class="material-symbols-outlined text-lg">clear</span>
           Limpiar Filtros
@@ -218,39 +203,15 @@ function getCCAANombre(ccaa: number): string {
       </div>
     </form>
 
-    {/* Tabla de pacientes - Desktop */}
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hidden lg:block">
-      <div class="overflow-x-auto overflow-y-visible">
+    {/* Tabla de pacientes */}
+    <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hidden lg:block">
+      <div class="overflow-x-auto">
         <table class="w-full table-fixed">
           <thead class="bg-gray-50 dark:bg-gray-700/50">
             <tr>
-              <th class="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                ID
-              </th>
-              <th class="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                Edad
-              </th>
-              <th class="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                Sexo
-              </th>
-              <th class="w-32 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                Diagnóstico
-              </th>
-              <th class="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                Servicio
-              </th>
-              <th class="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                Estancia
-              </th>
-              <th class="w-28 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                F. Ingreso
-              </th>
-              <th class="w-32 px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                CCAA
-              </th>
-              <th class="w-20 px-2 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">
-                Ver
-              </th>
+              {["ID","Edad","Sexo","Diagnóstico","Servicio","Estancia","F. Ingreso","CCAA","Ver"].map((t) => (
+                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">{t}</th>
+              ))}
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -262,34 +223,18 @@ function getCCAANombre(ccaa: number): string {
                 </td>
               </tr>
             ) : (
-              pacientesMostrados.map((paciente, i) => (
+              pacientesMostrados.map((paciente) => (
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td class="px-2 py-2 text-xs font-medium truncate" title={`#${paciente.data.paciente_id}`}>
-                    #{paciente.data.paciente_id}
-                  </td>
-                  <td class="px-2 py-2 text-xs truncate">
-                    {paciente.data.edad}
-                  </td>
-                  <td class="px-2 py-2 text-xs truncate">
-                    {getSexoNombre(paciente.data.sexo).substring(0, 1)}
-                  </td>
-                  <td class="px-2 py-2 text-xs font-mono truncate" title={paciente.data.diagnostico_principal}>
-                    {paciente.data.diagnostico_principal}
-                  </td>
-                  <td class="px-2 py-2 text-xs truncate" title={paciente.data.servicio}>
-                    {paciente.data.servicio}
-                  </td>
-                  <td class="px-2 py-2 text-xs text-center truncate">
-                    {paciente.data.estancia_dias}d
-                  </td>
-                  <td class="px-2 py-2 text-xs truncate">
-                    {paciente.data.fecha_ingreso}
-                  </td>
-                  <td class="px-2 py-2 text-xs truncate" title={getCCAANombre(paciente.data.ccaa)}>
-                    {getCCAANombre(paciente.data.ccaa)}
-                  </td>
+                  <td class="px-2 py-2 text-xs font-medium truncate">#{paciente.data.paciente_id}</td>
+                  <td class="px-2 py-2 text-xs truncate">{paciente.data.edad}</td>
+                  <td class="px-2 py-2 text-xs truncate">{getSexoNombre(paciente.data.sexo).substring(0, 1)}</td>
+                  <td class="px-2 py-2 text-xs font-mono truncate">{paciente.data.diagnostico_principal}</td>
+                  <td class="px-2 py-2 text-xs truncate">{paciente.data.servicio}</td>
+                  <td class="px-2 py-2 text-xs text-center truncate">{paciente.data.estancia_dias}d</td>
+                  <td class="px-2 py-2 text-xs truncate">{paciente.data.fecha_ingreso}</td>
+                  <td class="px-2 py-2 text-xs truncate">{getCCAANombre(paciente.data.ccaa)}</td>
                   <td class="px-2 py-2 text-xs text-center">
-                    <a 
+                    <a
                       href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                       title="Ver detalles completos"
@@ -305,139 +250,93 @@ function getCCAANombre(ccaa: number): string {
       </div>
 
       {/* Paginación */}
-      <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="text-sm text-gray-600 dark:text-gray-400">
+      <footer class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
           Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span> resultados
-        </div>
-        <div class="flex gap-2 flex-wrap justify-center">
+        </p>
+        <nav class="flex gap-2 flex-wrap justify-center">
           {currentPage > 1 && (
-            <a 
-              href={`/pacientes?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-            >
-              ← Anterior
-            </a>
+            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">← Anterior</a>
           )}
-          
-          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium">
-            Página {currentPage} de {totalPages}
-          </span>
-
+          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium">Página {currentPage} de {totalPages}</span>
           {currentPage < totalPages && (
-            <a 
-              href={`/pacientes?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
-            >
-              Siguiente →
-            </a>
+            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">Siguiente →</a>
           )}
-        </div>
-      </div>
-    </div>
+        </nav>
+      </footer>
+    </section>
 
-    {/* Vista de tarjetas - Móvil y Tablet */}
-    <div class="lg:hidden space-y-4">
+    {/* Vista móvil */}
+    <section class="lg:hidden space-y-4">
       {pacientesMostrados.length === 0 ? (
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+        <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
           <span class="material-symbols-outlined text-4xl mb-2 block text-gray-400">search_off</span>
           <p class="text-gray-500 dark:text-gray-400">No se encontraron pacientes con los filtros aplicados</p>
-        </div>
+        </article>
       ) : (
         pacientesMostrados.map((paciente) => (
-          <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-            <div class="flex items-start justify-between mb-3">
+          <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+            <header class="flex items-start justify-between mb-3">
               <div>
                 <h3 class="text-lg font-bold text-primary">#{paciente.data.paciente_id}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  {getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años
+                </p>
               </div>
-              <a 
+              <a
                 href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
                 class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                title="Ver detalles completos"
               >
                 <span class="material-symbols-outlined text-xl">visibility</span>
               </a>
-            </div>
-            
-            <div class="space-y-2">
+            </header>
+
+            <dl class="space-y-3 text-sm">
               <div class="grid grid-cols-2 gap-4">
-                <div class="flex items-start gap-2">
-                  <span class="material-symbols-outlined text-sm text-gray-400">medical_services</span>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Diagnóstico</p>
-                    <p class="text-sm font-medium font-mono truncate">{paciente.data.diagnostico_principal}</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start gap-2">
-                  <span class="material-symbols-outlined text-sm text-gray-400">apartment</span>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Servicio</p>
-                    <p class="text-sm font-medium truncate">{paciente.data.servicio}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="grid grid-cols-2 gap-4">
-                <div class="flex items-start gap-2">
-                  <span class="material-symbols-outlined text-sm text-gray-400">schedule</span>
-                  <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Estancia</p>
-                    <p class="text-sm font-medium">{paciente.data.estancia_dias} días</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start gap-2">
-                  <span class="material-symbols-outlined text-sm text-gray-400">calendar_today</span>
-                  <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Ingreso</p>
-                    <p class="text-sm font-medium">{paciente.data.fecha_ingreso}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="flex items-start gap-2">
-                <span class="material-symbols-outlined text-sm text-gray-400">location_on</span>
                 <div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">CCAA</p>
-                  <p class="text-sm font-medium">{getCCAANombre(paciente.data.ccaa)}</p>
+                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Diagnóstico</dt>
+                  <dd class="font-mono font-medium truncate">{paciente.data.diagnostico_principal}</dd>
+                </div>
+                <div>
+                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Servicio</dt>
+                  <dd class="font-medium truncate">{paciente.data.servicio}</dd>
                 </div>
               </div>
-            </div>
-          </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Estancia</dt>
+                  <dd class="font-medium">{paciente.data.estancia_dias} días</dd>
+                </div>
+                <div>
+                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Ingreso</dt>
+                  <dd class="font-medium">{paciente.data.fecha_ingreso}</dd>
+                </div>
+              </div>
+              <div>
+                <dt class="text-gray-500 dark:text-gray-400 text-xs">CCAA</dt>
+                <dd class="font-medium">{getCCAANombre(paciente.data.ccaa)}</dd>
+              </div>
+            </dl>
+          </article>
         ))
       )}
-      
+
       {/* Paginación móvil */}
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        <div class="text-sm text-center text-gray-600 dark:text-gray-400 mb-3">
+      <footer class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center space-y-3">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
           Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span>
-        </div>
-        <div class="flex gap-2 justify-center">
+        </p>
+        <nav class="flex gap-2 justify-center">
           {currentPage > 1 && (
-            <a 
-              href={`/pacientes?page=${currentPage - 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors text-sm"
-            >
-              ← Anterior
-            </a>
+            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">← Anterior</a>
           )}
-          
-          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium text-sm">
-            {currentPage} / {totalPages}
-          </span>
-
+          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium text-sm">{currentPage} / {totalPages}</span>
           {currentPage < totalPages && (
-            <a 
-              href={`/pacientes?page=${currentPage + 1}${searchQuery ? '&search=' + searchQuery : ''}${sexoFilter ? '&sexo=' + sexoFilter : ''}${diagnosticoFilter ? '&diagnostico=' + diagnosticoFilter : ''}${servicioFilter ? '&servicio=' + servicioFilter : ''}${ccaaFilter ? '&ccaa=' + ccaaFilter : ''}${categoriaFilter ? '&categoria=' + categoriaFilter : ''}`}
-              class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors text-sm"
-            >
-              Siguiente →
-            </a>
+            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">Siguiente →</a>
           )}
-        </div>
-      </div>
-    </div>
+        </nav>
+      </footer>
+    </section>
 
-  </div>
+  </main>
 </DashboardLayout>
