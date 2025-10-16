@@ -3,31 +3,78 @@ import DashboardLayout from '../../layouts/DashboardLayout.astro'
 
 const { id } = Astro.params
 
+// Obtener el parámetro de fecha de ingreso de la URL
+const url = new URL(Astro.request.url)
+const fechaIngreso = url.searchParams.get('fecha')
+
 // Convertir el id a número
 const pacienteId = Number(id)
 
-// Consultar la API con el parámetro id_usuario
-const API_URL = `https://g4be99438af815a-malackathon2025.adb.eu-madrid-1.oraclecloudapps.com/ords/malackathon/saludmental/?id_usuario=${pacienteId}`
+// Validar que ambos parámetros estén presentes
+if (!fechaIngreso) {
+  return Astro.redirect('/pacientes')
+}
+
+// Filtrar primero por id_usuario en la API, luego por fecha_de_ingreso en el cliente
+const API_URL = `https://g4be99438af815a-malackathon2025.adb.eu-madrid-1.oraclecloudapps.com/ords/malackathon/saludmental/`
+
+console.log('=== DEBUG INFO ===')
+console.log('Paciente ID buscado:', pacienteId)
+console.log('Fecha de Ingreso buscada:', fechaIngreso)
 
 let paciente = null
 
 try {
-  // Obtener datos de la API
-  const response = await fetch(API_URL)
-  const data = await response.json()
+  // Obtener datos de la API filtrando por id_usuario
+  let offset = 0
+  const limit = 1000
+  let hasMore = true
   
-  // La API devuelve un array de items, tomamos el primero (debería ser único)
-  if (data.items && data.items.length > 0) {
-    paciente = data.items[0]
+  // Buscar en todas las páginas hasta encontrar el paciente con la fecha correcta
+  while (hasMore && !paciente) {
+    const response = await fetch(`${API_URL}?q={"id_usuario":${pacienteId}}&limit=${limit}&offset=${offset}`)
+    const data = await response.json()
+    
+    if (data.items && data.items.length > 0) {
+      console.log(`📄 Encontrados ${data.items.length} registros para id_usuario=${pacienteId}`)
+      
+      // Filtrar por fecha_de_ingreso en el cliente
+      paciente = data.items.find((item: any) => 
+        item.id_usuario === pacienteId && item.fecha_de_ingreso === fechaIngreso
+      )
+      
+      if (paciente) {
+        console.log('✅ Paciente encontrado - ID:', paciente.id_usuario, 'Fecha:', paciente.fecha_de_ingreso)
+        break
+      }
+      
+      // Si hay más datos y no encontramos el paciente, continuar
+      hasMore = data.hasMore === true
+      offset += data.items.length
+    } else {
+      hasMore = false
+    }
   }
   
-  // Si no se encuentra el paciente, devolver 404
+  // Si no se encuentra el paciente, devolver a la lista
   if (!paciente) {
-    return Astro.redirect('/404')
+    console.log('❌ No se encontró paciente con ID:', pacienteId, 'y fecha:', fechaIngreso)
+    return Astro.redirect('/pacientes')
   }
 } catch (error) {
   console.error('Error al obtener datos de la API:', error)
-  return Astro.redirect('/404')
+  return Astro.redirect('/pacientes')
+}
+
+// Mapeo de categorías de ingreso
+const CATEGORIAS_INGRESO: Record<number, string> = {
+  0: "Trastornos del humor [afectivos]",
+  1: "Trastornos mentales y del comportamiento debidos al uso de sustancias psicoactivas",
+  2: "Esquizofrenia, trastornos esquizotípicos y trastornos delirantes",
+  3: "Trastornos neuróticos, trastornos relacionados con el estrés y trastornos somatomorfos",
+  4: "Trastornos de la personalidad y del comportamiento en adultos",
+  5: "Trastornos emocionales y del comportamiento que aparecen habitualmente en la niñez y en la adolescencia",
+  6: "Síndromes del comportamiento asociados con alteraciones fisiológicas y factores físicos",
 }
 
 // Función para obtener el nombre del sexo
@@ -62,10 +109,16 @@ function getTipoAlta(tipo: number): string {
   }
   return tipos[tipo] || `Tipo ${tipo}`
 }
+
+// Función para obtener categoría de ingreso
+function getCategoriaIngreso(categoria: number | string): string {
+  const categoriaNum = typeof categoria === 'string' ? parseInt(categoria) : categoria
+  return CATEGORIAS_INGRESO[categoriaNum] || `Categoría ${categoria}`
+}
 ---
 
 <DashboardLayout activePage="pacientes" title={`Paciente #${paciente.id_usuario}`}>
-  <div class="px-20 py-4 sm:p-4 lg:p-6 xl:p-8 max-w-[1600px] mx-auto min-w-[90%] sm:min-w-[70%]">
+  <div class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-12 xl:py-10 2xl:px-20 2xl:py-12 max-w-[2000px] mx-auto w-full">
     <!-- Breadcrumb -->
     <div class="mb-4 sm:mb-6">
       <a 
@@ -84,9 +137,9 @@ function getTipoAlta(tipo: number): string {
     </div>
 
     <!-- Información del Paciente -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10 2xl:gap-12 mb-6 sm:mb-8">
     <!-- Datos Personales -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-4 sm:p-6 lg:p-8 xl:p-10 border border-gray-200 dark:border-gray-700 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12 border border-gray-200 dark:border-gray-700 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300">
       <h2 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700">
         <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">person</span>
         Datos Personales
@@ -122,7 +175,7 @@ function getTipoAlta(tipo: number): string {
     </div>
 
     <!-- Datos Clínicos -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-4 sm:p-6 lg:p-8 xl:p-10 border border-gray-200 dark:border-gray-700 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12 border border-gray-200 dark:border-gray-700 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300">
       <h2 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700">
         <span class="material-symbols-outlined text-green-600 dark:text-green-400">medical_information</span>
         Datos Clínicos
@@ -146,10 +199,10 @@ function getTipoAlta(tipo: number): string {
             {paciente.servicio}
           </span>
         </div>
-        <div class="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700">
-          <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">Categoría de Ingreso:</span>
+        <div class="flex flex-col py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700">
+          <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium mb-2">Categoría de Ingreso:</span>
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-            {paciente.categoria_ingreso}
+            {getCategoriaIngreso(paciente.categoria_ingreso)}
           </span>
         </div>
       </div>
@@ -157,12 +210,12 @@ function getTipoAlta(tipo: number): string {
     </div>
 
     <!-- Información de Ingreso - Ocupa todo el ancho -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-4 sm:p-6 lg:p-8 xl:p-10 border border-gray-200 dark:border-gray-700 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300 mb-6 sm:mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md sm:shadow-lg p-4 sm:p-6 lg:p-8 xl:p-10 2xl:p-12 border border-gray-200 dark:border-gray-700 hover:shadow-lg sm:hover:shadow-xl transition-shadow duration-300 mb-6 sm:mb-8">
       <h2 class="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 flex items-center gap-2 pb-3 sm:pb-4 border-b border-gray-200 dark:border-gray-700">
         <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">calendar_month</span>
         Información de Ingreso
       </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
         <div class="space-y-1 sm:space-y-2">
           <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Fecha de Ingreso:</span>
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{formatearFecha(paciente.fecha_de_ingreso)}</span>

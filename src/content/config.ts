@@ -102,7 +102,8 @@ async function loadDatosPrincipales() {
     const pacientes = allPacientes.map((item: any, index: number) => {
       const { links, ...rest } = item;
       return {
-        id: `paciente-${item.paciente_id}-${index}`, // ID único para cada entrada
+        id: `paciente-${item.id_usuario}-${item.estancia_dias}-${index}`, // ID único para cada entrada
+        paciente_id: item.id_usuario, // Mapear id_usuario a paciente_id para compatibilidad
         ...rest,
         categoria_ingreso_descripcion: CATEGORIAS_INGRESO[item.categoria_ingreso] || `Categoría ${item.categoria_ingreso}`,
       };

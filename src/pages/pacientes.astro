@@ -18,6 +18,9 @@ const categoriaFilter = url.searchParams.get('categoria') || '';
 
 const itemsPerPage = 25;
 
+// Verificar si hay algún filtro activo
+const hayFiltrosActivos = searchQuery !== '' || sexoFilter !== '' || diagnosticoFilter !== '' || servicioFilter !== '' || ccaaFilter !== '' || categoriaFilter !== '';
+
 // Obtener valores únicos para los filtros
 const diagnosticosUnicos = [...new Set(todosPacientes.map(p => p.data.diagnostico_principal))].sort();
 const serviciosUnicos = [...new Set(todosPacientes.map(p => p.data.servicio))].sort();
@@ -38,6 +41,11 @@ let pacientesFiltrados = todosPacientes.filter(paciente => {
   
   return matchSearch && matchSexo && matchDiagnostico && matchServicio && matchCCAA && matchCategoria;
 });
+
+// Ordenar por ID solo si hay filtros activos
+if (hayFiltrosActivos) {
+  pacientesFiltrados = pacientesFiltrados.sort((a, b) => a.data.paciente_id - b.data.paciente_id);
+}
 
 // Calcular paginación
 const totalPacientes = pacientesFiltrados.length;
@@ -282,7 +290,7 @@ function getCCAANombre(ccaa: number): string {
                   </td>
                   <td class="px-2 py-2 text-xs text-center">
                     <a 
-                      href={`/paciente/${paciente.data.paciente_id}`}
+                      href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
                       class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                       title="Ver detalles completos"
                     >
@@ -343,7 +351,7 @@ function getCCAANombre(ccaa: number): string {
                 <p class="text-sm text-gray-600 dark:text-gray-400">{getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años</p>
               </div>
               <a 
-                href={`/paciente/${paciente.data.paciente_id}`}
+                href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
                 class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                 title="Ver detalles completos"
               >
