@@ -65,7 +65,7 @@ function getTipoAlta(tipo: number): string {
 ---
 
 <DashboardLayout activePage="pacientes" title={`Paciente #${paciente.id_usuario}`}>
-  <div class="p-3 sm:p-4 lg:p-6 xl:p-8 max-w-[1600px] mx-auto">
+  <div class="px-20 py-4 sm:p-4 lg:p-6 xl:p-8 max-w-[1600px] mx-auto min-w-[90%] sm:min-w-[70%]">
     <!-- Breadcrumb -->
     <div class="mb-4 sm:mb-6">
       <a 
@@ -105,10 +105,6 @@ function getTipoAlta(tipo: number): string {
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente.edad} años</span>
         </div>
         <div class="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700">
-          <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">Edad en Ingreso:</span>
-          <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente.edad_en_ingreso} años</span>
-        </div>
-        <div class="flex justify-between items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700">
           <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">Sexo:</span>
           <span class={`inline-flex px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-full ${
             paciente.sexo === 1
@@ -119,7 +115,7 @@ function getTipoAlta(tipo: number): string {
           </span>
         </div>
         <div class="flex justify-between items-center py-2 sm:py-3">
-          <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">Comunidad Autónoma:</span>
+          <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">CCAA:</span>
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente.ccaa}</span>
         </div>
       </div>
@@ -132,13 +128,13 @@ function getTipoAlta(tipo: number): string {
         Datos Clínicos
       </h2>
       <div class="space-y-3 sm:space-y-5">
-        <div class="py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex flex-row justify-between items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700">
           <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium block mb-2">Diagnóstico Principal:</span>
           <span class="font-mono text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded inline-block">
             {paciente.diagnostico_principal}
           </span>
         </div>
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 gap-2">
+        <div class="flex flex-row justify-between items-center py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 gap-2">
           <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">Diagnóstico 2:</span>
           <span class="font-mono text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded">
             {paciente['diagnóstico 2'] || 'N/A'}
@@ -156,12 +152,6 @@ function getTipoAlta(tipo: number): string {
             {paciente.categoria_ingreso}
           </span>
         </div>
-        <div class="flex justify-between items-center py-2 sm:py-3">
-          <span class="text-sm sm:text-base text-gray-600 dark:text-gray-400 font-medium">GRD APR:</span>
-          <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-            {paciente.grd_apr}
-          </span>
-        </div>
       </div>
     </div>
     </div>
@@ -172,7 +162,7 @@ function getTipoAlta(tipo: number): string {
         <span class="material-symbols-outlined text-orange-600 dark:text-orange-400">calendar_month</span>
         Información de Ingreso
       </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         <div class="space-y-1 sm:space-y-2">
           <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Fecha de Ingreso:</span>
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{formatearFecha(paciente.fecha_de_ingreso)}</span>
@@ -184,10 +174,6 @@ function getTipoAlta(tipo: number): string {
         <div class="space-y-1 sm:space-y-2">
           <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Estancia (días):</span>
           <span class="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">{paciente.estancia_dias}</span>
-        </div>
-        <div class="space-y-1 sm:space-y-2">
-          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Fecha de Inicio Contacto:</span>
-          <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{formatearFecha(paciente.fecha_de_inicio_contacto)}</span>
         </div>
         <div class="space-y-1 sm:space-y-2">
           <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Tipo de Contacto:</span>
@@ -206,14 +192,6 @@ function getTipoAlta(tipo: number): string {
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente.mes_de_ingreso}</span>
         </div>
         <div class="space-y-1 sm:space-y-2">
-          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Procedencia:</span>
-          <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente.procedencia}</span>
-        </div>
-        <div class="space-y-1 sm:space-y-2">
-          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Continuidad Asistencial:</span>
-          <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente.continuidad_asistencial}</span>
-        </div>
-        <div class="space-y-1 sm:space-y-2">
           <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Ingreso en UCI:</span>
           <span class={`px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium inline-block ${
             paciente.ingreso_en_uci === 1 
@@ -226,10 +204,6 @@ function getTipoAlta(tipo: number): string {
         <div class="space-y-1 sm:space-y-2">
           <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Días en UCI:</span>
           <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente['días uci'] || 'N/A'}</span>
-        </div>
-        <div class="space-y-1 sm:space-y-2">
-          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium block">Régimen de Financiación:</span>
-          <span class="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">{paciente['régimen financiación']}</span>
         </div>
       </div>
     </div>
