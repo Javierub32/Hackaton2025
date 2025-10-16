@@ -18,8 +18,17 @@ const categoriaFilter = url.searchParams.get('categoria') || '';
 
 const itemsPerPage = 25;
 
+// Validar que el searchQuery sea un número o esté vacío
+const searchError = searchQuery !== '' && !/^\d+$/.test(searchQuery);
+
 // Verificar si hay algún filtro activo
-const hayFiltrosActivos = searchQuery !== '' || sexoFilter !== '' || diagnosticoFilter !== '' || servicioFilter !== '' || ccaaFilter !== '' || categoriaFilter !== '';
+const hayFiltrosActivos =
+  searchQuery !== '' ||
+  sexoFilter !== '' ||
+  diagnosticoFilter !== '' ||
+  servicioFilter !== '' ||
+  ccaaFilter !== '' ||
+  categoriaFilter !== '';
 
 // Obtener valores únicos para los filtros
 const diagnosticosUnicos = [...new Set(todosPacientes.map(p => p.data.diagnostico_principal))].sort();
@@ -29,16 +38,16 @@ const categoriasUnicas = [...new Set(todosPacientes.map(p => p.data.categoria_in
 
 // Filtrar pacientes
 let pacientesFiltrados = todosPacientes.filter(paciente => {
-  const matchSearch = searchQuery === '' || 
-    paciente.data.paciente_id.toString().includes(searchQuery) ||
-    paciente.data.diagnostico_principal.toLowerCase().includes(searchQuery.toLowerCase());
-  
+  const matchSearch =
+    searchQuery === '' ||
+    paciente.data.paciente_id.toString().includes(searchQuery);
+
   const matchSexo = sexoFilter === '' || paciente.data.sexo.toString() === sexoFilter;
   const matchDiagnostico = diagnosticoFilter === '' || paciente.data.diagnostico_principal === diagnosticoFilter;
   const matchServicio = servicioFilter === '' || paciente.data.servicio === servicioFilter;
   const matchCCAA = ccaaFilter === '' || paciente.data.ccaa.toString() === ccaaFilter;
   const matchCategoria = categoriaFilter === '' || paciente.data.categoria_ingreso.toString() === categoriaFilter;
-  
+
   return matchSearch && matchSexo && matchDiagnostico && matchServicio && matchCCAA && matchCategoria;
 });
 
@@ -58,7 +67,7 @@ const pacientesMostrados = pacientesFiltrados.slice(startIndex, endIndex);
 
 // Función para obtener el nombre del sexo
 function getSexoNombre(sexo: number): string {
-  switch(sexo) {
+  switch (sexo) {
     case 1: return 'Masculino';
     case 2: return 'Femenino';
     default: return 'No especificado';
@@ -74,6 +83,13 @@ function getCCAANombre(ccaa: number): string {
   };
   return ccaaMap[ccaa] || `CCAA ${ccaa}`;
 }
+
+// Helpers para paginación accesible (conserva filtros)
+function buildPageLink(n: number) {
+  const params = new URLSearchParams(url.searchParams);
+  params.set('page', String(n));
+  return `?${params.toString()}`;
+}
 ---
 
 <DashboardLayout title="Gestión de Pacientes" activePage="pacientes">
@@ -87,138 +103,191 @@ function getCCAANombre(ccaa: number): string {
       </p>
     </header>
 
-    {/* Formulario de filtros */}
-    <form method="get" class="space-y-6">
-      {/* Barra de búsqueda */}
-      <div class="relative">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-          search
-        </span>
-        <input
-          type="text"
-          name="search"
-          value={searchQuery}
-          placeholder="Buscar por ID o diagnóstico..."
-          class="w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
-        />
-      </div>
+    {/* Formulario de filtros con fieldset/legend para evitar label huérfana */}
+    <form method="get" class="space-y-6" aria-labelledby="filtros-title" novalidate>
+      <fieldset class="space-y-4">
+        <legend id="filtros-title" class="text-base sm:text-lg font-semibold">
+          Opciones de búsqueda
+        </legend>
 
-      {/* Filtros */}
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-        {/* Sexo */}
-        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-          Sexo
-          <select
-            name="sexo"
-            id="sexo"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+        {/* Barra de búsqueda con label asociada y alto contraste de icono/placeholder */}
+        <div>
+          <label for="search" class="sr-only">Buscar por ID de paciente</label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2
+                     text-slate-700 dark:text-slate-200 pointer-events-none"
+              aria-hidden="true"
+            >
+              search
+            </span>
+            <input
+              id="search"
+              type="text"
+              name="search"
+              value={searchQuery}
+              placeholder="Buscar por ID de paciente..."
+              aria-describedby={searchError ? 'search-error' : undefined}
+              aria-errormessage={searchError ? 'search-error' : undefined}
+              aria-invalid={searchError ? 'true' : 'false'}
+              class={`w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border bg-white dark:bg-gray-800
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+                      placeholder:text-slate-600 dark:placeholder:text-slate-300
+                      ${
+                        searchError
+                          ? 'border-red-600 dark:border-red-400 focus-visible:ring-red-600'
+                          : 'border-gray-300 dark:border-gray-600 focus-visible:ring-blue-600'
+                      }`}
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="off"
+            />
+          </div>
+
+          {/* Región viva para anunciar errores al lector de pantalla */}
+          <div
+            id="search-error"
+            class={`mt-2 flex items-center gap-2 text-sm ${
+              searchError ? 'text-red-700 dark:text-red-300' : 'sr-only'
+            }`}
+            role={searchError ? 'alert' : undefined}
+            aria-live={searchError ? 'assertive' : undefined}
           >
-            <option value="">Todos</option>
-            <option value="1" selected={sexoFilter === '1'}>Masculino</option>
-            <option value="2" selected={sexoFilter === '2'}>Femenino</option>
-          </select>
-        </label>
+            <span class="material-symbols-outlined text-base" aria-hidden="true">error</span>
+            <p>Por favor, ingresa solo números para buscar por ID de paciente.</p>
+          </div>
+        </div>
 
-        {/* Diagnóstico */}
-        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-          Diagnóstico
-          <select
-            name="diagnostico"
-            id="diagnostico"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+        {/* Filtros */}
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+          {/* Sexo */}
+          <label for="sexo" class="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Sexo
+            <select
+              name="sexo"
+              id="sexo"
+              autocomplete="off"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+            >
+              <option value="">Todos</option>
+              <option value="1" selected={sexoFilter === '1'}>Masculino</option>
+              <option value="2" selected={sexoFilter === '2'}>Femenino</option>
+            </select>
+          </label>
+
+          {/* Diagnóstico */}
+          <label for="diagnostico" class="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Diagnóstico
+            <select
+              name="diagnostico"
+              id="diagnostico"
+              autocomplete="off"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+            >
+              <option value="">Todos</option>
+              {diagnosticosUnicos.slice(0, 50).map(diag => (
+                <option value={diag} selected={diagnosticoFilter === diag}>{diag}</option>
+              ))}
+            </select>
+          </label>
+
+          {/* Servicio */}
+          <label for="servicio" class="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Servicio
+            <select
+              name="servicio"
+              id="servicio"
+              autocomplete="off"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+            >
+              <option value="">Todos</option>
+              {serviciosUnicos.map(serv => (
+                <option value={serv} selected={servicioFilter === serv}>{serv}</option>
+              ))}
+            </select>
+          </label>
+
+          {/* CCAA */}
+          <label for="ccaa" class="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Comunidad Autónoma
+            <select
+              name="ccaa"
+              id="ccaa"
+              autocomplete="off"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+            >
+              <option value="">Todas</option>
+              {ccaaUnicas.map(ccaa => (
+                <option value={ccaa} selected={ccaaFilter === ccaa.toString()}>
+                  {getCCAANombre(ccaa)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Categoría */}
+          <label for="categoria" class="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            Categoría de Ingreso
+            <select
+              name="categoria"
+              id="categoria"
+              autocomplete="off"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
+            >
+              <option value="">Todas</option>
+              {categoriasUnicas.map(cat => (
+                <option value={cat} selected={categoriaFilter === cat.toString()}>
+                  {CATEGORIAS_INGRESO[cat] || `Categoría ${cat}`}
+                </option>
+              ))}
+            </select>
+          </label>
+        </section>
+
+        {/* Botones */}
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            type="submit"
+            class="w-full sm:w-auto px-4 py-2 bg-blue-700 text-white hover:bg-blue-800 dark:bg-blue-400 dark:text-slate-900 dark:hover:bg-blue-300 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
           >
-            <option value="">Todos</option>
-            {diagnosticosUnicos.slice(0, 50).map(diag => (
-              <option value={diag} selected={diagnosticoFilter === diag}>{diag}</option>
-            ))}
-          </select>
-        </label>
-
-        {/* Servicio */}
-        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-          Servicio
-          <select
-            name="servicio"
-            id="servicio"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">filter_alt</span>
+            Aplicar Filtros
+          </button>
+          <a
+            href="/pacientes"
+            class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium flex items-center justify-center gap-2"
           >
-            <option value="">Todos</option>
-            {serviciosUnicos.map(serv => (
-              <option value={serv} selected={servicioFilter === serv}>{serv}</option>
-            ))}
-          </select>
-        </label>
-
-        {/* CCAA */}
-        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-          Comunidad Autónoma
-          <select
-            name="ccaa"
-            id="ccaa"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
-          >
-            <option value="">Todas</option>
-            {ccaaUnicas.map(ccaa => (
-              <option value={ccaa} selected={ccaaFilter === ccaa.toString()}>
-                {getCCAANombre(ccaa)}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {/* Categoría */}
-        <label class="flex flex-col gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-          Categoría de Ingreso
-          <select
-            name="categoria"
-            id="categoria"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
-          >
-            <option value="">Todas</option>
-            {categoriasUnicas.map(cat => (
-              <option value={cat} selected={categoriaFilter === cat.toString()}>
-                {CATEGORIAS_INGRESO[cat] || `Categoría ${cat}`}
-              </option>
-            ))}
-          </select>
-        </label>
-      </section>
-
-      {/* Botones */}
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button
-          type="submit"
-          class="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center gap-2"
-        >
-          <span class="material-symbols-outlined text-lg">filter_alt</span>
-          Aplicar Filtros
-        </button>
-        <a
-          href="/pacientes"
-          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium flex items-center justify-center gap-2"
-        >
-          <span class="material-symbols-outlined text-lg">clear</span>
-          Limpiar Filtros
-        </a>
-      </div>
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">clear</span>
+            Limpiar Filtros
+          </a>
+        </div>
+      </fieldset>
     </form>
 
+    {/* Encabezado lógico de la sección de listado para no saltar niveles */}
+    <h2 id="listado-title" class="sr-only">Listado de pacientes</h2>
+
     {/* Tabla de pacientes */}
-    <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hidden lg:block">
+    <section
+      class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hidden lg:block"
+      role="region"
+      aria-labelledby="listado-title"
+    >
       <div class="overflow-x-auto">
         <table class="w-full table-fixed">
+          <caption class="sr-only">Tabla de pacientes con filtros aplicados</caption>
           <thead class="bg-gray-50 dark:bg-gray-700/50">
             <tr>
-              {["ID","Edad","Sexo","Diagnóstico","Servicio","Estancia","F. Ingreso","CCAA","Ver"].map((t) => (
-                <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">{t}</th>
+              {["ID","Edad","Sexo","Diagnóstico","Servicio","Estancia","F. Ingreso","CCAA","Ver más"].map((t) => (
+                <th scope="col" class="px-2 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-tight">{t}</th>
               ))}
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             {pacientesMostrados.length === 0 ? (
               <tr>
-                <td colspan="9" class="px-2 py-12 text-center text-gray-500 dark:text-gray-400">
-                  <span class="material-symbols-outlined text-4xl mb-2 block">search_off</span>
+                <td colspan="9" class="px-2 py-12 text-center text-gray-600 dark:text-gray-300">
+                  <span class="material-symbols-outlined text-4xl mb-2 block" aria-hidden="true">search_off</span>
                   No se encontraron pacientes con los filtros aplicados
                 </td>
               </tr>
@@ -236,10 +305,16 @@ function getCCAANombre(ccaa: number): string {
                   <td class="px-2 py-2 text-xs text-center">
                     <a
                       href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
-                      class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                      title="Ver detalles completos"
+                      class="group inline-flex items-center justify-center w-10 h-10 rounded-lg
+                            bg-blue-700 text-white hover:bg-blue-800
+                            dark:bg-blue-400 dark:text-slate-900 dark:hover:bg-blue-300
+                            focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                            focus-visible:ring-blue-600 dark:focus-visible:ring-blue-300
+                            focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+                            transition-colors"
+                      aria-label="Ver detalles del paciente"
                     >
-                      <span class="material-symbols-outlined text-base">visibility</span>
+                      <span class="material-symbols-outlined text-lg" aria-hidden="true">visibility</span>
                     </a>
                   </td>
                 </tr>
@@ -251,69 +326,81 @@ function getCCAANombre(ccaa: number): string {
 
       {/* Paginación */}
       <footer class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <p class="text-sm text-gray-700 dark:text-gray-300" aria-live="polite">
           Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span> resultados
         </p>
-        <nav class="flex gap-2 flex-wrap justify-center">
+        <nav class="flex gap-2 flex-wrap justify-center" aria-label="Paginación de resultados">
           {currentPage > 1 && (
-            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">← Anterior</a>
+            <a href={buildPageLink(currentPage - 1)} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">← Anterior</a>
           )}
-          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium">Página {currentPage} de {totalPages}</span>
+          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium" aria-current="page">
+            Página {currentPage} de {totalPages}
+          </span>
           {currentPage < totalPages && (
-            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">Siguiente →</a>
+            <a href={buildPageLink(currentPage + 1)} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium">Siguiente →</a>
           )}
         </nav>
       </footer>
     </section>
 
     {/* Vista móvil */}
-    <section class="lg:hidden space-y-4">
+    <section class="lg:hidden space-y-4" aria-labelledby="listado-title">
       {pacientesMostrados.length === 0 ? (
         <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center">
-          <span class="material-symbols-outlined text-4xl mb-2 block text-gray-400">search_off</span>
-          <p class="text-gray-500 dark:text-gray-400">No se encontraron pacientes con los filtros aplicados</p>
+          <span class="material-symbols-outlined text-4xl mb-2 block text-gray-500 dark:text-gray-300" aria-hidden="true">search_off</span>
+          <p class="text-gray-700 dark:text-gray-300">No se encontraron pacientes con los filtros aplicados</p>
         </article>
       ) : (
         pacientesMostrados.map((paciente) => (
           <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
             <header class="flex items-start justify-between mb-3">
               <div>
-                <h3 class="text-lg font-bold text-primary">#{paciente.data.paciente_id}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">
+                {/* Contraste mejorado para el h3 móvil */}
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                  #{paciente.data.paciente_id}
+                </h3>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
                   {getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años
                 </p>
               </div>
               <a
                 href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
-                class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                class="group inline-flex items-center justify-center w-10 h-10 rounded-lg
+                      bg-blue-700 text-white hover:bg-blue-800
+                      dark:bg-blue-400 dark:text-slate-900 dark:hover:bg-blue-300
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+                      focus-visible:ring-blue-600 dark:focus-visible:ring-blue-300
+                      focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+                      transition-colors"
+                aria-label="Ver detalles del paciente"
               >
-                <span class="material-symbols-outlined text-xl">visibility</span>
+                <span class="material-symbols-outlined text-lg" aria-hidden="true">visibility</span>
               </a>
             </header>
 
             <dl class="space-y-3 text-sm">
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Diagnóstico</dt>
+                  <dt class="text-gray-700 dark:text-gray-300 text-xs">Diagnóstico</dt>
                   <dd class="font-mono font-medium truncate">{paciente.data.diagnostico_principal}</dd>
                 </div>
                 <div>
-                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Servicio</dt>
+                  <dt class="text-gray-700 dark:text-gray-300 text-xs">Servicio</dt>
                   <dd class="font-medium truncate">{paciente.data.servicio}</dd>
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Estancia</dt>
+                  <dt class="text-gray-700 dark:text-gray-300 text-xs">Estancia</dt>
                   <dd class="font-medium">{paciente.data.estancia_dias} días</dd>
                 </div>
                 <div>
-                  <dt class="text-gray-500 dark:text-gray-400 text-xs">Ingreso</dt>
+                  <dt class="text-gray-700 dark:text-gray-300 text-xs">Ingreso</dt>
                   <dd class="font-medium">{paciente.data.fecha_ingreso}</dd>
                 </div>
               </div>
               <div>
-                <dt class="text-gray-500 dark:text-gray-400 text-xs">CCAA</dt>
+                <dt class="text-gray-700 dark:text-gray-300 text-xs">CCAA</dt>
                 <dd class="font-medium">{getCCAANombre(paciente.data.ccaa)}</dd>
               </div>
             </dl>
@@ -323,16 +410,16 @@ function getCCAANombre(ccaa: number): string {
 
       {/* Paginación móvil */}
       <footer class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-center space-y-3">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <p class="text-sm text-gray-700 dark:text-gray-300" aria-live="polite">
           Mostrando <span class="font-medium">{startIndex + 1}</span> a <span class="font-medium">{endIndex}</span> de <span class="font-medium">{totalPacientes.toLocaleString()}</span>
         </p>
-        <nav class="flex gap-2 justify-center">
+        <nav class="flex gap-2 justify-center" aria-label="Paginación de resultados">
           {currentPage > 1 && (
-            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">← Anterior</a>
+            <a href={buildPageLink(currentPage - 1)} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">← Anterior</a>
           )}
-          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium text-sm">{currentPage} / {totalPages}</span>
+          <span class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 font-medium text-sm" aria-current="page">{currentPage} / {totalPages}</span>
           {currentPage < totalPages && (
-            <a href={`...`} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">Siguiente →</a>
+            <a href={buildPageLink(currentPage + 1)} class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-sm">Siguiente →</a>
           )}
         </nav>
       </footer>
