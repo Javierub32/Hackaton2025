@@ -102,10 +102,10 @@ function getCCAANombre(ccaa: number): string {
             name="search"
             value={searchQuery}
             placeholder="Buscar por ID de paciente..."
-            class={`w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border bg-white dark:bg-gray-800 focus:ring-primary ${
+            class={`w-full pl-10 pr-4 py-2 text-sm sm:text-base rounded-lg border bg-white dark:bg-gray-800 focus:ring-blue-500 ${
               searchError 
                 ? 'border-red-500 dark:border-red-400 focus:border-red-500' 
-                : 'border-gray-300 dark:border-gray-600 focus:border-primary'
+                : 'border-gray-300 dark:border-gray-600 focus:border-blue-600'
             }`}
           />
         </div>
@@ -125,7 +125,7 @@ function getCCAANombre(ccaa: number): string {
           <select
             name="sexo"
             id="sexo"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
           >
             <option value="">Todos</option>
             <option value="1" selected={sexoFilter === '1'}>Masculino</option>
@@ -139,7 +139,7 @@ function getCCAANombre(ccaa: number): string {
           <select
             name="diagnostico"
             id="diagnostico"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
           >
             <option value="">Todos</option>
             {diagnosticosUnicos.slice(0, 50).map(diag => (
@@ -154,7 +154,7 @@ function getCCAANombre(ccaa: number): string {
           <select
             name="servicio"
             id="servicio"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
           >
             <option value="">Todos</option>
             {serviciosUnicos.map(serv => (
@@ -169,7 +169,7 @@ function getCCAANombre(ccaa: number): string {
           <select
             name="ccaa"
             id="ccaa"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
           >
             <option value="">Todas</option>
             {ccaaUnicas.map(ccaa => (
@@ -186,7 +186,7 @@ function getCCAANombre(ccaa: number): string {
           <select
             name="categoria"
             id="categoria"
-            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary focus:ring-primary"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-blue-600 focus:ring-blue-500"
           >
             <option value="">Todas</option>
             {categoriasUnicas.map(cat => (
@@ -301,7 +301,7 @@ function getCCAANombre(ccaa: number): string {
           <article class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
             <header class="flex items-start justify-between mb-3">
               <div>
-                <h3 class="text-lg font-bold text-primary">#{paciente.data.paciente_id}</h3>
+                <h3 class="text-lg font-bold text-blue-600 dark:text-blue-400">#{paciente.data.paciente_id}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   {getSexoNombre(paciente.data.sexo)} • {paciente.data.edad} años
                 </p>
