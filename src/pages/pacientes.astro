@@ -209,7 +209,7 @@ function getCCAANombre(ccaa: number): string {
         <table class="w-full table-fixed">
           <thead class="bg-gray-50 dark:bg-gray-700/50">
             <tr>
-              {["ID","Edad","Sexo","Diagnóstico","Servicio","Estancia","F. Ingreso","CCAA","Ver"].map((t) => (
+              {["ID","Edad","Sexo","Diagnóstico","Servicio","Estancia","F. Ingreso","CCAA","Ver más"].map((t) => (
                 <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight">{t}</th>
               ))}
             </tr>
@@ -237,18 +237,19 @@ function getCCAANombre(ccaa: number): string {
   <a
     href={`/paciente/${paciente.data.paciente_id}?fecha=${encodeURIComponent(paciente.data.fecha_ingreso)}`}
     class="group inline-flex items-center justify-center w-10 h-10 rounded-lg
-           bg-blue-100 text-blue-700 hover:bg-blue-200
-           dark:bg-blue-900/40 dark:text-blue-200 dark:hover:bg-blue-800/60
+           bg-blue-600 text-white hover:bg-blue-700
+           dark:bg-blue-400 dark:text-slate-900 dark:hover:bg-blue-300
            focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
            focus-visible:ring-blue-500 dark:focus-visible:ring-blue-300
            focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
-           transition-colors duration-200"
+           transition-colors"
     aria-label="Ver detalles del paciente"
   >
     <span class="material-symbols-outlined text-lg" aria-hidden="true">visibility</span>
     <span class="sr-only">Ver detalles</span>
   </a>
 </td>
+
 
                 </tr>
               ))
