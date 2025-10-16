@@ -4,6 +4,17 @@ import DashboardLayout from '../layouts/DashboardLayout.astro';
 
 <DashboardLayout title="Dashboard de Salud Pública" activePage="dashboard">
   <div class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+
+     {/* Sección de bienvenida */}
+    <header class="mb-8 lg:mb-10">
+      <h1 class="text-3xl sm:text-4xl font-bold mb-2 flex items-center gap-2">
+        ¡Bienvenido al Panel de Salud Pública!  <span class="material-symbols-outlined text-4xl text-blue-500">emoji_people</span>
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 max-w-2xl">
+        Consulta las métricas de salud en tiempo real, analiza los ingresos hospitalarios 
+        y obtén una visión general de la situación sanitaria por comunidad autónoma.
+      </p>
+    </header>
     
     {/* Filtros */}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
